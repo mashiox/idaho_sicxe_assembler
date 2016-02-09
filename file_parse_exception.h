@@ -15,11 +15,11 @@ class file_parse_exception {
 public:
     file_parse_exception(string s) {
         message = s;
-        }
+    }	
 
     file_parse_exception() {
         message = "An error has occurred";
-        }
+    }
 
     string getMessage() {
         return message;

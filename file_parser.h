@@ -9,6 +9,16 @@
 
 using namespace std;
 
+struct line{
+    string label,
+           opcode,
+           operand,
+           comment;
+    line(){
+        label = opcode = operands = comment = "";
+    }
+};
+
 class file_parser {
     public:
         // ctor, filename is the parameter.  A driver program will read
@@ -43,7 +53,8 @@ class file_parser {
 
     private:
         // your variables and private methods go here
-
+        vector<line> container; 
+        
 };
 
 #endif
