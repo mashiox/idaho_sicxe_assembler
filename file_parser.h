@@ -5,7 +5,9 @@
 #ifndef FILE_PARSER_H
 #define FILE_PARSER_H
 
+#include <fstream>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -15,7 +17,7 @@ struct line{
            operand,
            comment;
     line(){
-        label = opcode = operands = comment = "";
+        label = opcode = operand = comment = "";
     }
 };
 
@@ -53,8 +55,10 @@ class file_parser {
 
     private:
         // your variables and private methods go here
-        vector<line> container; 
-        
+        vector<line> container;
+        ifstream infile;
+        string file;
+    
 };
 
 #endif
