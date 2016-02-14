@@ -12,12 +12,27 @@
 using namespace std;
 
 struct line{
+    private:
     string label,
            opcode,
            operand,
            comment;
+    public:       
     line(){
         label = opcode = operand = comment = "";
+    }
+    
+    getlabel()
+        return this.label; 
+    getopcode()
+        return this.opcode;
+    getoperand()
+        return this.operand;
+    getcomment()
+        return this.comment;
+        
+    setlabel(string line){
+        
     }
 };
 
