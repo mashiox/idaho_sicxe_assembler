@@ -1,39 +1,77 @@
 /*  file_parser.h
     CS530, Spring 2016
 */
-
 #ifndef FILE_PARSER_H
 #define FILE_PARSER_H
-
-#include <fstream>
-#include <string>
-#include <vector>
+#include<fstream>
+#include<string>
+#include<vector>
+#include<ctype.h>
+#include<stdio.h>
+#include<stdbool.h>
 
 using namespace std;
 
 struct line{
-    private:
     string label,
            opcode,
            operand,
            comment;
-    public:       
     line(){
-        label = opcode = operand = comment = "";
-    }
-    
-    getlabel()
-        return this.label; 
-    getopcode()
-        return this.opcode;
-    getoperand()
-        return this.operand;
-    getcomment()
-        return this.comment;
-        
-    setlabel(string line){
-        
-    }
+        label = "";
+	opcode = "";
+	operand = "";
+	comment = "";
+	}
+    string getlabel(){
+        return label;
+	}
+    string getopcode(){
+        return opcode;
+	}
+    string getoperand(){
+        return operand;
+	}
+    string getcomment(){
+        return comment;
+	}
+    void setlabel(string lab){
+        label = lab;
+	}
+    void setopcode(string op){
+    	opcode = op;
+	}
+    void setoperand(string oper){
+        operand = oper;
+	}
+    void setcomment(string com){
+        comment = com; 
+	}
+	bool islabel(string islab){
+    	for(int i = 0; i<sizeof(islab); i++){
+            if(!isdigit(islab[i]) || !isalpha(islab[i]))
+            	return false;
+		}
+    	return true;    
+	}
+	bool isopcode(string isop){
+    	string validop[1000] = ("ADD", "ADDF", "ADDR", "AND", "CLEAR", "COMP",
+		"COMPF", "COMPR", "DIV", "DIVF", "DIVR", "FIX", "FLOAT", "HIO", "J",
+		"JEQ", "JGT", "JLT", "JSUB", "LDA", "LDB", "LDCH", "LDF", "LDL", "LDS",
+		"LDT", "LDX", "LPS", "MUL", "MULF", "MULR", "NORM", "OR", "RD", "RMO",
+		"SHIFTL", "SHIFTR", "SIO", "SSK", "STA", "STB", "STCH", "STF", "STI",
+		"STL", "STS", "STSW", "STT", "STX", "SUB", "SUBF", "SUBR", "SUBR",
+		"SVC", "TD", "TIO", "TIX", "TIXR", "WD");
+        for(int i = 0; i<sizeof(validop);i++)
+            if(isop == validop[i])
+                return true;   
+        return false;           
+	}
+	bool iscomment(string iscom){
+    	if(iscom[0] != '.')
+     	   return false;
+  		return true;      
+	}
 };
 
 class file_parser {
@@ -67,6 +105,7 @@ class file_parser {
 
         // returns the number of lines in the source code file
         int size();
+        
 
     private:
         // your variables and private methods go here
