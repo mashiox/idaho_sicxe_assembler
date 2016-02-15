@@ -22,17 +22,33 @@ struct line{
         label = opcode = operand = comment = "";
     }
     
-    getlabel()
-        return this.label; 
-    getopcode()
-        return this.opcode;
-    getoperand()
-        return this.operand;
-    getcomment()
-        return this.comment;
-        
-    setlabel(string line){
-        
+    string getlabel(){
+        return label; 
+    }
+    string getopcode(){
+        return opcode;
+    }
+    string getoperand(){
+        return operand;
+    }
+    string getcomment(){
+        return comment;
+    }
+    
+    void setlabel(string line){
+        label = line;
+    }
+    
+    void setopcode(string opc){
+        opcode = opc;
+    }
+    
+    void setoperand(string oper){
+        operand = oper;
+    }
+    
+    void setcomment(string com){
+        comment = com;
     }
 };
 
