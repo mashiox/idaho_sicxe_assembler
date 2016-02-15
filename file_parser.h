@@ -65,7 +65,8 @@ struct line{
         for(int i = 0; i<sizeof(validop);i++)
             if(isop == validop[i])
                 return true;   
-        return false;           
+        return false;
+        
 	}
 	bool iscomment(string iscom){
     	if(iscom[0] != '.')
