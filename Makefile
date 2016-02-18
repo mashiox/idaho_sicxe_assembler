@@ -3,7 +3,7 @@
 # prog1
 # CS530, Spring 2016
 
-TORM = parsesicxe.o file_parser.o file_parse_exception.o
+TORM = parsesicxe parsesicxe.o file_parser.o file_parse_exception.o
 CC = g++
 CCFLAGS = -g -O3 -Wall -Wpointer-arith -Wcast-qual -Wwrite-strings
 
