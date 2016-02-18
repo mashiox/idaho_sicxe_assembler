@@ -11,6 +11,11 @@
 using namespace std;
 
 int main(int argc, const char *argv[]) {
+    if (argc != 2) {
+        cout << "Proper usage is " << argv[0] << " sourcefile.\n";
+        return -1;
+    }
+    
 	file_parser* fp = new file_parser(argv[1]);
     try {
         fp->read_file();
