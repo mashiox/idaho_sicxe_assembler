@@ -18,6 +18,7 @@ struct line{
            operand,
            comment;
     line(){
+<<<<<<< HEAD
         label = "";
 	opcode = "";
 	operand = "";
@@ -78,6 +79,39 @@ struct line{
   	  	return false;
   	return true;      
 	}
+=======
+        label = opcode = operand = comment = "";
+    }
+    
+    string getlabel(){
+        return label; 
+    }
+    string getopcode(){
+        return opcode;
+    }
+    string getoperand(){
+        return operand;
+    }
+    string getcomment(){
+        return comment;
+    }
+    
+    void setlabel(string line){
+        label = line;
+    }
+    
+    void setopcode(string opc){
+        opcode = opc;
+    }
+    
+    void setoperand(string oper){
+        operand = oper;
+    }
+    
+    void setcomment(string com){
+        comment = com;
+    }
+>>>>>>> 2313a1c357f9aff3afefa10ce70400925ae8848d
 };
 
 class file_parser {
