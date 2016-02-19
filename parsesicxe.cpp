@@ -26,5 +26,5 @@ int main(int argc, char *argv[]) {
     
     fp.print_file();
     
-	return 0;
+    return 0;
 }
