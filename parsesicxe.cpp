@@ -10,21 +10,22 @@
 
 using namespace std;
 
-int main(int argc, char *argv[]) {
-	if (argc != 2) {
-		cout << "proper usage is " << argv[0] << " filename\n";
-		return -1;
-	}
-
-	file_parser fp (argv[1]);
+int main(int argc, const char *argv[]) {
+    if (argc != 2) {
+        cout << "Proper usage is " << argv[0] << " sourcefile.\n";
+        return -1;
+    }
+    
+	file_parser* fp = new file_parser(argv[1]);
     try {
-        fp.read_file();
+        fp->read_file();
     } catch (file_parse_exception e) {
         cout << e.getMessage() << "\n";
         return -1;
     }
-    
-    fp.print_file();
+
+    fp->print_file();
+    delete fp;
     
 	return 0;
 }

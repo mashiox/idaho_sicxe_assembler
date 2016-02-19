@@ -150,8 +150,12 @@ class file_parser {
     private:
         // your variables and private methods go here
         vector<line> container;
-        ifstream infile;
-        string file;
+        string filename;
+        const string* source;
+    
+        // Reads the entire source file into memory, throws an error if the
+        // file cannot be opened or memory cannot be allocated
+        const string* get_file_contents();
     
 };
 
