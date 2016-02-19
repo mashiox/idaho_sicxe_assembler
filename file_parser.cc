@@ -35,8 +35,11 @@ void file_parser::read_file(){
     while (getline(sstream, str)) {
         struct line line_item;
         // Detect comments and labels from str
-        
-        // ...
+        if ( str.size() > 0 ){
+            // Reassigns str without any comments.
+            str = tokenize_comment(str, line_item);
+            
+        }
         
         // Finally then pass to tokenizer
         set_token(line_item);
@@ -121,4 +124,15 @@ const string* file_parser::get_file_contents() {
     stream.close();
     delete[] buffer;
     return contents;
+}
+
+string file_parser::tokenize_comment(string line, struct line &line_item){
+    n = line.find('.');
+    if ( n != string::npos ){
+        line_item.setcomment(line.substr(n));
+        // Resizes the string to not include the full stop
+        // and anything to the right of the full stop.
+        line = line.substr(0, n);
+    }
+    return line;
 }
