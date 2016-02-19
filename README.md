@@ -2,8 +2,8 @@
 A C++ implementation of the SIC/XE assembler for CS530
 
 Work Allocations:
-  Matt:
-  Phillip:
-  Mel:
-  Shad:
+  Matt: Syntax
+  Phillip: Classification
+  Mel: Tokenization/Unit Testing
+  Shad: Input checking
  
