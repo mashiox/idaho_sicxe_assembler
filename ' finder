@@ -1,0 +1,24 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+int main(void)	{
+	std::string temp;
+	cin >> temp;
+	
+	std::string operand;
+
+	std::size_t first = temp.find("'");
+	std::size_t last = temp.rfind("'");
+	
+	if(first!=std::string::npos || last!=std::string::npos)	{
+		operand = temp.substr(first, last-first+1);
+		
+	 }
+	 else 	{
+	 	cout << "Error, no operand found" << endl;
+	 }
+	 
+	 cout << operand << endl;
+	return 0;
+}
