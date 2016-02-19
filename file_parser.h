@@ -74,41 +74,12 @@ struct line{
 	}
 */	
     bool iscomment(string iscom){
-   	if(iscom[0] != '.')
-  	  	return false;
-  	return true;      
+        if(iscom[0] != '.')
+            return false;
+        return true;      
 	}
-        label = opcode = operand = comment = "";
-    }
     
-    string getlabel(){
-        return label; 
-    }
-    string getopcode(){
-        return opcode;
-    }
-    string getoperand(){
-        return operand;
-    }
-    string getcomment(){
-        return comment;
-    }
     
-    void setlabel(string line){
-        label = line;
-    }
-    
-    void setopcode(string opc){
-        opcode = opc;
-    }
-    
-    void setoperand(string oper){
-        operand = oper;
-    }
-    
-    void setcomment(string com){
-        comment = com;
-    }
 };
 
 class file_parser {
