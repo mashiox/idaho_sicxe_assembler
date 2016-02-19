@@ -33,12 +33,18 @@ void file_parser::read_file(){
     istringstream sstream (*source);
     string str;
     while (getline(sstream, str)) {
-        // pass to tokenizer
+        struct line line_item;
+        // Detect comments and labels from str
+        
+        // ...
+        
+        // Finally then pass to tokenizer
+        set_token(line_item);
     }
 }
 
 /**
- * 
+ *  
  */
 string file_parser::get_token(unsigned int row, unsigned int column){
     try {
@@ -58,6 +64,13 @@ string file_parser::get_token(unsigned int row, unsigned int column){
         throw file_parse_exception("Error: get token row is out of bounds, must be between 0 and size()-1");
     }
 }
+
+/**
+ *  
+ */
+ void file_parser::set_token(struct line line_item){
+     container.push_back( line_item );
+ }
 
 /**
  * Prints the contents of the file to stdout

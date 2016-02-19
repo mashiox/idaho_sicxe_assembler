@@ -124,6 +124,9 @@ class file_parser {
         // Reads the entire source file into memory, throws an error if the
         // file cannot be opened or memory cannot be allocated
         const string* get_file_contents();
+        
+        // Sets the token as a struct line
+        void set_token(struct line);
     
 };
 
