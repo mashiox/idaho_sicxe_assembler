@@ -36,8 +36,7 @@ struct line{
         return comment;
 	}
     void setlabel(string lab){
-	if(lab.length() > 7)
-    		lab.resize(8);
+	//if(lab.length() > 7)	lab.resize(8);
         label = lab;
 	}
     void setopcode(string op){
