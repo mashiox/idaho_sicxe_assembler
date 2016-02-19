@@ -70,7 +70,7 @@ string file_parser::get_token(unsigned int row, unsigned int column){
 void file_parser::print_file(){
 	vector<line>::iterator iter;
 	for ( iter = container.begin() ; iter < container.end() ; iter++ ){
-        cout << iter->label << "\t" << iter->opcode << "\t" << iter->operand << "\t" << iter->comment << "\n";
+        cout << iter->label << setw(16) << iter->opcode << setw(16) << iter->operand << setw(16) << iter->comment << setw(16) << endl;
 	}
 }
 
