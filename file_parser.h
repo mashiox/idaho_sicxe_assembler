@@ -18,8 +18,7 @@ struct line{
            operand,
            comment;
     line(){
-<<<<<<< HEAD
-        label = "";
+    label = "";
 	opcode = "";
 	operand = "";
 	comment = "";
@@ -79,7 +78,6 @@ struct line{
   	  	return false;
   	return true;      
 	}
-=======
         label = opcode = operand = comment = "";
     }
     
@@ -111,7 +109,6 @@ struct line{
     void setcomment(string com){
         comment = com;
     }
->>>>>>> 2313a1c357f9aff3afefa10ce70400925ae8848d
 };
 
 class file_parser {
