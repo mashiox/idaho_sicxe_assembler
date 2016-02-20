@@ -9,16 +9,16 @@ int main(void)	{
 	std::string operand;
 
 	std::size_t first = temp.find("'");
-	std::size_t last = temp.rfind("'");
+	std::size_t last = temp.rfind("'", temp.size());
 	
-	if(first!=std::string::npos || last!=std::string::npos)	{
-		operand = temp.substr(first, last-first+1);
-		
+	if(first==std::string::npos || last==std::string::npos)	{
+		cout << "Error, no operand found" << endl;
+	 }
+	 else if (first == last)	{
+	 	cout << "Error, missing second quote" << endl;
 	 }
 	 else 	{
-	 	cout << "Error, no operand found" << endl;
+	 	operand = temp.substr(first, last-first+1);
 	 }
-	 
-	 cout << operand << endl;
 	return 0;
 }
