@@ -50,13 +50,11 @@ struct line{
         comment = com; 
 	}
     bool islabel(string islab){
-    	if(!isalpha(islab[0]))
-		return false;
-		   	for(int i = 0; i<sizeof(islab); i++){
-   	if(!isdigit(islab[i]) || !isalpha(islab[i]))
-           	return false;
-	}
-	   return true;    
+        if( !isalpha(islab[0]) ) return false;
+        for(string::size_type idx = 0 ; idx < islab.size() ; idx++){
+   	        if(!isdigit(islab[idx]) || !isalpha(islab[idx])) return false;
+        }
+        return true;    
 	}
 /*	
     bool isopcode(string isop){
