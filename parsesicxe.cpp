@@ -27,5 +27,5 @@ int main(int argc, const char *argv[]) {
     fp->print_file();
     delete fp;
     
-	return 0;
+    return 0;
 }

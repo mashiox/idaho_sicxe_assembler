@@ -81,7 +81,11 @@ string file_parser::get_token(unsigned int row, unsigned int column){
 void file_parser::print_file(){
 	vector<line>::iterator iter;
 	for ( iter = container.begin() ; iter < container.end() ; iter++ ){
+<<<<<<< HEAD
         // iomanip
+=======
+        cout << iter->label << setw(16) << iter->opcode << setw(16) << iter->operand << setw(16) << iter->comment << setw(16) << endl;
+>>>>>>> 57a617d284d0a5ca700360b620f8f022c691d261
 	}
 }
 
@@ -91,6 +95,7 @@ void file_parser::print_file(){
 int file_parser::size(){
 	return (int)container.size();
 }
+<<<<<<< HEAD
 
 /**
  * Returns a pointer to a string with the file's contents
@@ -136,3 +141,5 @@ string file_parser::tokenize_comment(string line, struct line &line_item){
     }
     return line;
 }
+=======
+>>>>>>> 57a617d284d0a5ca700360b620f8f022c691d261
