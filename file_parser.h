@@ -18,11 +18,8 @@ struct line{
            operand,
            comment;
     line(){
-<<<<<<< HEAD
     label = "";
-=======
         label = "";
->>>>>>> 57a617d284d0a5ca700360b620f8f022c691d261
 	opcode = "";
 	operand = "";
 	comment = "";
@@ -81,11 +78,7 @@ struct line{
             return false;
         return true;      
 	}
-<<<<<<< HEAD
-    
-    
-=======
->>>>>>> 57a617d284d0a5ca700360b620f8f022c691d261
+
 };
 
 class file_parser {
