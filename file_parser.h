@@ -124,7 +124,7 @@ class file_parser {
         
         // Sets the token as a struct line
         void set_token(struct line);
-        string tokenize_comment(string, struct line);
+        string tokenize_comment(string line, struct line &line_item);
         string tokenize_label(string line, struct line );
     
 };
