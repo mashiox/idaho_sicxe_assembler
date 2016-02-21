@@ -126,6 +126,7 @@ class file_parser {
         void set_token(struct line);
         string tokenize_comment(string line, struct line &line_item);
         string tokenize_label(string line, struct line );
+        void find_operand(string line, struct line);
     
 };
 
