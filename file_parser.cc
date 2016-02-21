@@ -72,14 +72,9 @@ string file_parser::get_token(unsigned int row, unsigned int column){
 void file_parser::print_file(){
 	vector<line>::iterator iter;
 	for ( iter = container.begin() ; iter < container.end() ; iter++ ){
-<<<<<<< HEAD
-        cout.setf(ios::left);
-	cout << setw(8) << iter->getlabel() << setw(8) << iter->getopcode() \
-        << setw(18) << iter->getoperand() <<setw(46) << iter->getcomment() <<"\n";
-=======
-	cout.setf(ios::left);	
-        cout << iter->label << setw(16) << iter->opcode << setw(16) << iter->operand << setw(16) << iter->comment << setw(16) << endl;
->>>>>>> 98caa2bc1b0a2c7e6751c9674593fb1d6acdcda7
+	cout.setf(ios::left);
+	cout.width(16);
+	cout << iter->label << setw(16) << iter->opcode << setw(16) << iter->operand << setw(36) << iter->comment << endl;
 	}
 }
 
