@@ -138,3 +138,36 @@ string file_parser::tokenize_comment(string line, struct line &line_item){
     }
     return line;
 }
+
+void file_parser::find_operand(string line, struct line) 	{
+	std::size_t first = line.find("'");
+	std::size_t last = line.rfind("'", line.size());
+	
+	if(first==std::string::npos || last==std::string::npos)	{
+		cout << "Error, no operand found" << endl;
+	 }
+	 else if (first == last)	{
+	 	cout << "Error, missing second quote" << endl;
+	 }
+	 else {
+	 	switch (line[first-1]) {
+			case 'c':
+			case 'C':
+			case 'x':
+			case 'X':	{
+				line.setoperand(tok.substr(first-1, last-first+1));
+				break;	
+			}
+			default: 	{
+				line.setoperand(tok.substr(first, last-first+1));
+				break;
+			}
+		}
+	 }
+}
+
+	
+	
+	
+	
+}
