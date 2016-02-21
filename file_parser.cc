@@ -74,7 +74,7 @@ void file_parser::print_file(){
 	for ( iter = container.begin() ; iter < container.end() ; iter++ ){
 	cout.setf(ios::left);
 	cout.width(16);
-	cout << iter->label << setw(16) << iter->opcode << setw(16) << iter->operand << setw(36) << iter->comment << endl;
+	cout << iter->getlabel() << setw(16) << iter->getopcode() << setw(16) << iter->getoperand() << setw(36) << iter->getcomment() << endl;
 	}
 }
 
