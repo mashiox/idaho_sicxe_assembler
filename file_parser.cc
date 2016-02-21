@@ -139,7 +139,7 @@ string file_parser::tokenize_comment(string line, struct line &line_item){
     return line;
 }
 
-void file_parser::find_operand(string line, struct line) 	{
+void file_parser::find_operand(string line, struct line line_item) 	{
 	std::size_t first = line.find("'");
 	std::size_t last = line.rfind("'", line.size());
 	
@@ -155,11 +155,11 @@ void file_parser::find_operand(string line, struct line) 	{
 			case 'C':
 			case 'x':
 			case 'X':	{
-				line.setoperand(tok.substr(first-1, last-first+1));
+				line_item.setoperand(tok.substr(first-1, last-first+1));
 				break;	
 			}
 			default: 	{
-				line.setoperand(tok.substr(first, last-first+1));
+				line_item.setoperand(tok.substr(first, last-first+1));
 				break;
 			}
 		}
