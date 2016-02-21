@@ -4,6 +4,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <vector>
+#include <iomanip>
 #include "file_parser.h"
 #include "file_parse_exception.h"
 
@@ -128,7 +129,7 @@ const string* file_parser::get_file_contents() {
 }
 
 string file_parser::tokenize_comment(string line, struct line &line_item){
-    n = line.find('.');
+    string::size_type n = line.find('.');
     if ( n != string::npos ){
         line_item.setcomment(line.substr(n));
         // Resizes the string to not include the full stop

@@ -50,13 +50,11 @@ struct line{
         comment = com; 
 	}
     bool islabel(string islab){
-    	if(!isalpha(islab[0]))
-		return false;
-		   	for(int i = 0; i<sizeof(islab); i++){
-   	if(!isdigit(islab[i]) || !isalpha(islab[i]))
-           	return false;
-	}
-	   return true;    
+        if( !isalpha(islab[0]) ) return false;
+        for(string::size_type idx = 0 ; idx < islab.size() ; idx++){
+   	        if(!isdigit(islab[idx]) || !isalpha(islab[idx])) return false;
+        }
+        return true;    
 	}
 /*	
     bool isopcode(string isop){
@@ -126,8 +124,8 @@ class file_parser {
         
         // Sets the token as a struct line
         void set_token(struct line);
-        string tokenize_comment(string);
-        string file_parser::tokenize_label(string line, struct line &line_item);
+        string tokenize_comment(string line, struct line &line_item);
+        string tokenize_label(string line, struct line );
     
 };
 
