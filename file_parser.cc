@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
@@ -35,9 +36,8 @@ void file_parser::read_file(){
     istringstream sstream (*source);
     string str;
     while (getline(sstream, str)) {
-        struct line tstruct;
-        file_parser::tokenizer toke (str);
-        tstruct = toke.tokens();
+        tokenizer toke (str);
+        struct line tstruct = toke.tokens();
         container.push_back(tstruct);
     }
 }
@@ -102,14 +102,14 @@ const string* file_parser::get_file_contents() {
     stream.seekg(0, ios::beg);
     
     char* buffer = NULL;
-    buffer = new char[filesize+1];
+    buffer = new (nothrow) char[filesize+1];
     if (buffer == NULL) {
         stream.close();
         throw file_parse_exception("Could not allocate memory to read source file.");
     }
     stream.read(buffer, filesize);
     buffer[filesize] = '\0';
-    string* contents = new string(buffer);
+    string* contents = new (nothrow) string(buffer);
     
     stream.close();
     delete[] buffer;
@@ -123,17 +123,17 @@ file_parser::tokenizer::tokenizer(const string& str) {
 }
 
 struct file_parser::line file_parser::tokenizer::tokens() {
-    static int lineno = 0; ++lineno;
+    static int lineno = 0;
+    ++lineno;
     column previous = none;
     struct line tokenstruct;
-    size_t last, first = 0;
+    size_t last = 0, first = 0;
     
     last = str.find_first_not_of(delimiters, 0);
     first = str.find_first_of(delimiters, last);
 retoken:
-        //throw file_parse_exception("verify quotes are properly closed", lineno);
     while (first != string::npos || last != string::npos) {
-        size_t quotes;
+        ptrdiff_t quotes;
         string token = str.substr(last, first-last);
         if (iscomment(token)) {
             token = str.substr(last, string::npos);
@@ -145,12 +145,15 @@ retoken:
                 previous = label;
                 goto next_token;
             } else {
-                throw file_parse_exception("invalid label.\nA valid label starts with a letter and contains only alpha numeric characters.",
+                throw file_parse_exception("Invalid label, a label starts with a letter and contains only alphanumeric characters.",
                     lineno, str);
             }
         }
         quotes = count(token.begin(), token.end(), '\'');
         if (quotes%2) {
+            if (first == string::npos) {
+                throw file_parse_exception("Check that quoted characters are correctly terminated.", lineno, str);
+            }
             first = str.find_first_of(delimiters, first+1);
             goto retoken;
         }
@@ -161,7 +164,9 @@ retoken:
             tokenstruct.setoperand(token);
             previous = operand;
         } else {
-            throw file_parse_exception("there are too many instructions.", lineno, str);
+            throw file_parse_exception("There are too many instructions."
+                "\nProper format may include only the following: label opcode operand(s) .comment",
+                lineno, str);
         }
     next_token:
         last = str.find_first_not_of(delimiters, first);
