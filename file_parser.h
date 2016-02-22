@@ -94,7 +94,7 @@ class file_parser {
     // Reads the entire source file into memory, throws an error if the
     // file cannot be opened or memory cannot be allocated
     const string* get_file_contents();
-    
+        
     class tokenizer {
         
     public:
@@ -108,7 +108,7 @@ class file_parser {
         bool islabel(string islab){
             if(!isalpha(islab[0]))
                 return false;
-            for(int i = 1; i<islab.length(); i++){
+            for(string::size_type i = 1; i<islab.length(); i++){
                 if(!isalnum(islab[i]))
                     return false;
             }
