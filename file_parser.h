@@ -1,14 +1,16 @@
-/*  file_parser.h
-    CS530, Spring 2016
+/* Phillip Domann, Shad, Melanie, Matt
+   mascxxxx
+   Team Idaho
+   prog1
+   CS530, Spring 2016
 */
+
 #ifndef FILE_PARSER_H
 #define FILE_PARSER_H
 
 #include <string>
 #include <vector>
 #include <ctype.h>
-#include <sstream>
-#include <stdio.h>
 #include <stdbool.h>
 
 using namespace std;
@@ -44,67 +46,66 @@ class file_parser {
 
         // returns the number of lines in the source code file
         int size();
-        
 
     private:
-        // your variables and private methods go here
-    struct line{
-        string label,
-        opcode,
-        operand,
-        comment;
-        line(){
-            label = "";
-            opcode = "";
-            operand = "";
-            comment = "";
-        }
-        string getlabel(){
-            return label;
-        }
-        string getopcode(){
-            return opcode;
-        }
-        string getoperand(){
-            return operand;
-        }
-        string getcomment(){
-            return comment;
-        }
-        void setlabel(string lab){
-            if(lab.length() > 7)
-                lab.resize(8);
-            label = lab;
-        }
-        void setopcode(string op){
-            opcode = op;
-        }
-        void setoperand(string oper){
-            operand = oper;
-        }
-        void setcomment(string com){
-            comment = com; 
-        }
-    };
     
-    vector<line> container;
-    string filename;
-    const string* source;
-    
-    // Reads the entire source file into memory, throws an error if the
-    // file cannot be opened or memory cannot be allocated
-    const string* get_file_contents();
-        
-    class tokenizer {
-        
-    public:
-        tokenizer(const string&);
-        struct line tokens();
-    private:
-        string str;
-        enum column {none, label, opcode, operand, comment};
+        string filename;
+        int lineno;
         static const char* delimiters;
-        
+        enum column {none, label, opcode, operand, comment};
+
+        struct line{
+            string label,
+            opcode,
+            operand,
+            comment;
+            line(){
+                label = "";
+                opcode = "";
+                operand = "";
+                comment = "";
+            }
+            
+            string getlabel(){
+                return label;
+            }
+            string getopcode(){
+                return opcode;
+            }
+            string getoperand(){
+                return operand;
+            }
+            string getcomment(){
+                return comment;
+            }
+            void setlabel(string lab){
+                if(lab.length() > 7)
+                    lab.resize(8);
+                label = lab;
+            }
+            void setopcode(string op){
+                opcode = op;
+            }
+            void setoperand(string oper){
+                operand = oper;
+            }
+            void setcomment(string com){
+                comment = com;
+            }
+        };
+
+        // Container for token rows
+        vector<line> container;
+    
+        // Reads the entire source file into memory, throws an error if the
+        // file cannot be opened or memory cannot be allocated
+        string get_file_contents();
+    
+        // Breaks a source line into tokens and returns a token struct
+        // Throws errors if the line does not meet proper format
+        struct line tokenize(const string&);
+
+        // Verifies that a label has proper format
         bool islabel(string islab){
             if(!isalpha(islab[0]))
                 return false;
@@ -114,14 +115,14 @@ class file_parser {
             }
             return true;
         }
-        
+    
+        // Checks if a token is a comment
         bool iscomment(string iscom){
             if(iscom[0] != '.')
                 return false;
             return true;
         }
         
-    };
 };
 
 #endif

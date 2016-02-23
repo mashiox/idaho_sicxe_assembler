@@ -1,11 +1,14 @@
-/*  file_parse_exception.h
-    Exception class for file_parser
-    CS530 Spring 2016
-    Alan Riggins
+/* Phillip Domann, Shad, Melanie, Matt
+   mascxxxx
+   Team Idaho
+   prog1
+   CS530, Spring 2016
 */
 
 #ifndef FILE_PARSE_EXCEPTION_H
 #define FILE_PARSE_EXCEPTION_H
+
+#include <sstream>
 
 using namespace std;
 
@@ -16,8 +19,8 @@ public:
         message = s;
     }
     
-    file_parse_exception(string s, int lineno, string token) {
-        message = "Line "+itos(lineno)+": "+token+"\n"+s;
+    file_parse_exception(string s, int lineno, string line) {
+        message = "Line "+itos(lineno)+": "+line+"\n"+s;
     }
 
     file_parse_exception() {

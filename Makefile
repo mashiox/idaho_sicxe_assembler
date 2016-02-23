@@ -1,5 +1,6 @@
-# 
+# Phillip Domann, Shad, Melanie, Matt
 # mascxxxx
+# Team Idaho
 # prog1
 # CS530, Spring 2016
 
