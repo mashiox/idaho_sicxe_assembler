@@ -4,12 +4,15 @@
 # prog1
 # CS530, Spring 2016
 
-TORM = prog1 file_parser.o file_parse_exception.o
+TORM = parsesicxe parsesicxe.o file_parser.o file_parse_exception.o
 CC = g++
 CCFLAGS = -g -O3 -Wall -Wpointer-arith -Wcast-qual -Wwrite-strings
 
-all: file_parser.o file_parse_exception.o
-	${CC} ${CCFLAGS} -o prog1 file_parser.o file_parse_exception.o
+parsesicxe: parsesicxe.o file_parser.o file_parse_exception.o
+	${CC} ${CCFLAGS} -o parsesicxe parsesicxe.o file_parser.o file_parse_exception.o
+
+parsesicxe.o: parsesicxe.cpp
+	${CC} ${CCFLAGS} -c parsesicxe.cpp
 
 file_parser.o: file_parser.cc file_parser.h
 	${CC} ${CCFLAGS} -c file_parser.cc
