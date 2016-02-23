@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-/* Phillip Domann, Shad, Melanie, Matt
-=======
 /* Phillip Domann, Shad Aziz, Melanie Reed, Matt Walther
->>>>>>> 3d4855533739d3685d8428c4eaccc5b1d8b03724
    mascxxxx
    Team Idaho
    prog1
