@@ -1,8 +1,9 @@
-/*
- * mascxxxx
- * prog1
- * CS530, Spring 2016
- */
+/* Phillip Domann, Shad, Melanie, Matt
+   mascxxxx
+   Team Idaho
+   prog1
+   CS530, Spring 2016
+*/
 
 #include <iostream>
 #include "file_parser.h"
@@ -12,7 +13,7 @@ using namespace std;
 
 int main(int argc, const char *argv[]) {
     if (argc != 2) {
-        cout << "Proper usage is " << argv[0] << " sourcefile.\n";
+        cout << "Proper usage is " << argv[0] << " sourcefile\n";
         return -1;
     }
     
@@ -21,7 +22,7 @@ int main(int argc, const char *argv[]) {
         fp->read_file();
     } catch (file_parse_exception e) {
         cout << e.getMessage() << "\n";
-        return -1;
+        return 1;
     }
 
     fp->print_file();
