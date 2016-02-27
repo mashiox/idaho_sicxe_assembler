@@ -7,6 +7,11 @@
 
 using namespace std;
 
+struct opcodes {
+    int format;
+    int opcode;
+}
+
 class opcodetab {
     public:
         // ctor
