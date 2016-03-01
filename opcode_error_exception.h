@@ -12,7 +12,7 @@ using namespace std;
 
 class opcode_error_exception {
 public:
-    opcode_error_exception {
+    opcode_error_exception() {
         message = "An opcode error has occured.";
     }
     opcode_error_exception(string s) {
