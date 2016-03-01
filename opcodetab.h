@@ -35,7 +35,9 @@ class opcodetab {
         // throws an opcode_error_exception if the opcode is not 
         // found in the table.        
         int get_instruction_size(string);
-                        
+            if(opcodeTab.find(string) == opcodeTab.end())
+                throw opcode_error_exception("Error: Opcode is not valid");
+            return opcodeTab.find(string)->second;    
     private:
         // your variables and private methods go here
 
