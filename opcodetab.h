@@ -49,10 +49,22 @@ class opcodetab {
         // NOTE: the opcode must be prepended with a '+' for format 4.
         // throws an opcode_error_exception if the opcode is not 
         // found in the table.        
-        int get_instruction_size(string);
-            if(opcodeTab.find(string) == opcodeTab.end())
+        int get_instruction_size(string){
+	    if(string.size() == 0 || opcodeTab.find(string) == opcodeTab.end())
                 throw opcode_error_exception("Error: Opcode is not valid");
-            return opcodeTab.find(string)->second;    
+	    else{
+		if
+		struct* A = opcodeTab.find(string)->second;
+	    	if(A.format() == 3 && string[0] == '+'){
+			return 4;
+		}
+		else if(A.format() != 3 && string[0] == '+'){
+			throw opcode_error_exception("Error: Invalid use of + on Opcode);
+		}
+		else{
+			return A.format();
+		}
+	    } 
     private:
         // your variables and private methods go here
         map<string, struct opcodes*> opcodeTab;
