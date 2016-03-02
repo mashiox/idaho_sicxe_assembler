@@ -19,9 +19,9 @@ map<std::string, struct opcodes*>& operator<<(map<std::string,struct opcodes*>& 
 }
 
 struct opcodes {
-        string format;
+        int format;
         int opcode;
-        opcodes(string f, int o){
+        opcodes(int f, int o){
             format = f;
             opcode = o;
         }
