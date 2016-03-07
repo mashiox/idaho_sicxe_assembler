@@ -6,6 +6,7 @@
 #define OPCODETAB_H
 
 #include <map>
+#include "opcode_error_exception.h"
 
 using namespace std;
 
@@ -49,17 +50,16 @@ class opcodetab {
         // NOTE: the opcode must be prepended with a '+' for format 4.
         // throws an opcode_error_exception if the opcode is not 
         // found in the table.        
-        int get_instruction_size(string){
-	    if(string.size() == 0 || opcodeTab.find(string) == opcodeTab.end())
+        int get_instruction_size(string s){
+	    if(s.size() == 0 || opmap.find(s) == opmap.end())
                 throw opcode_error_exception("Error: Opcode is not valid");
 	    else{
-		if
-		struct* A = opcodeTab.find(string)->second;
-	    	if(A.format() == 3 && string[0] == '+'){
+		struct opcodes* A = opmap.find(s)->second;
+	    	if(A.format() == 3 && s[0] == '+'){
 			return 4;
 		}
-		else if(A.format() != 3 && string[0] == '+'){
-			throw opcode_error_exception("Error: Invalid use of + on Opcode);
+		else if(A.format() != 3 && s[0] == '+'){
+			throw opcode_error_exception("Error: Invalid use of + on Opcode");
 		}
 		else{
 			return A.format();

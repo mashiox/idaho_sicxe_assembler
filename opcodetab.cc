@@ -6,9 +6,8 @@
 
 #include "opcodetab.h"
 
-using namespace std;
+opcodetab{
 
-opcodetab::opcodetab(){
     opcodeTab << pair<string, struct opcodes* > ( "ADD"   , new struct opcodes(3,  24 ) );
     opcodeTab << pair<string, struct opcodes* > ( "ADDF"  , new struct opcodes(3,  88 ) );
     opcodeTab << pair<string, struct opcodes* > ( "ADDR"  , new struct opcodes(2  ,  144) );
