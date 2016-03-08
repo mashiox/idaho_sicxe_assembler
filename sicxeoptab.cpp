@@ -16,7 +16,7 @@
 using namespace std;
 
 struct instr {
-	string menmonic;
+    string menmonic;
     short size;
     string opcode;
 };
@@ -93,6 +93,8 @@ void test_size_n(struct instr);
 void test_size_4(struct instr);
 void test_opcode_n(struct instr);
 void test_opcode_4(struct instr);
+void test_empty_str();
+void test_str(string);
 
 string strtolower(string& str) {
     string retstr;
@@ -132,6 +134,7 @@ void test_size_n(struct instr instr) {
     } catch (opcode_error_exception e) {
         cout << "*fail: " << test_instr << " size, expecting size " << instr.size << " but received exception\n";
         ++fail;
+        cout << e.getMessage() << "\n";
     }
 }
 
@@ -158,6 +161,7 @@ void test_size_4(struct instr instr) {
             cout << "pass: +" << test_instr << " size, caught exception\n";
             ++pass;
         }
+        cout << e.getMessage() << "\n";
     }
 }
 
@@ -167,7 +171,7 @@ void test_opcode_n(struct instr instr) {
     try {
         test_opcode = tab->get_machine_code(test_instr);
         if (strtolower(test_opcode).compare(instr.opcode) == 0) {
-            cout << "pass: " << test_instr << " opcode " << instr.opcode << "\n";
+            cout << "pass: " << test_instr << " opcode " << test_opcode << "\n";
             ++pass;
         } else {
             cout << "*fail: " << test_instr << " opcode, excpecting " << instr.opcode << " but returned " << test_opcode << "\n";
@@ -176,6 +180,7 @@ void test_opcode_n(struct instr instr) {
     } catch (opcode_error_exception e) {
         cout << "*fail: " << test_instr << " opcode, excpecting " << instr.opcode << " but received exception\n";
         ++fail;
+        cout << e.getMessage() << "\n";
     }
 }
 
@@ -185,7 +190,7 @@ void test_opcode_4(struct instr instr) {
     try {
         test_opcode = tab->get_machine_code("+"+test_instr);
         if (strtolower(test_opcode).compare(instr.opcode) == 0 && instr.size == 3) {
-            cout << "pass: +" << test_instr << " opcode " << instr.opcode << "\n";
+            cout << "pass: +" << test_instr << " opcode " << test_opcode << "\n";
             ++pass;
         } else if (instr.size == 3) {
             cout << "*fail: +" << test_instr << " opcode, excpecting " << instr.opcode << " but returned " << test_opcode << "\n";
@@ -202,6 +207,53 @@ void test_opcode_4(struct instr instr) {
             cout << "pass: +" << test_instr << " opcode, caught exception\n";
             ++pass;
         }
+        cout << e.getMessage() << "\n";
+    }
+}
+
+void test_empty_str() {
+    string test_size;
+    try {
+        test_size = tab->get_instruction_size(string());
+        cout << "*fail: empty string size, excpecting an exception\n";
+        ++fail;
+    } catch (opcode_error_exception e) {
+        cout << "pass: empty string size, caught exception\n";
+        ++pass;
+        cout << e.getMessage() << "\n";
+    }
+    string test_opcode;
+    try {
+        test_opcode = tab->get_machine_code(string());
+        cout << "*fail: empty string opcode, excpecting an exception\n";
+        ++fail;
+    } catch (opcode_error_exception e) {
+        cout << "pass: empty string opcode, caught exception\n";
+        ++pass;
+        cout << e.getMessage() << "\n";
+    }
+}
+
+void test_str(string str) {
+    string test_size;
+    try {
+        test_size = tab->get_instruction_size(str);
+        cout << "*fail: "+str+" string size, excpecting an exception\n";
+        ++fail;
+    } catch (opcode_error_exception e) {
+        cout << "pass: "+str+" string size, caught exception\n";
+        ++pass;
+        cout << e.getMessage() << "\n";
+    }
+    string test_opcode;
+    try {
+        test_opcode = tab->get_machine_code(str);
+        cout << "*fail: "+str+" string opcode, excpecting an exception\n";
+        ++fail;
+    } catch (opcode_error_exception e) {
+        cout << "pass: "+str+" string opcode, caught exception\n";
+        ++pass;
+        cout << e.getMessage() << "\n";
     }
 }
 
@@ -215,10 +267,11 @@ int main(int argc, const char *argv[]) {
         test_size_4(instrs[i]);
         test_opcode_n(instrs[i]);
         test_opcode_4(instrs[i]);
-        //empty string test
-        //bad input test
     }
-    
+    test_empty_str();
+    test_str("zzz");
+    test_str("!");
+    test_str("+");
     int test_count = pass+fail;
     cout << pass << " of " << test_count << " tests passed\n";
     cout.flush();
