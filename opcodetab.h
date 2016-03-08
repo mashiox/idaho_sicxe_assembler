@@ -37,19 +37,20 @@ class opcodetab {
         int get_instruction_size(string);
                         
     private:
-
-    struct instr {
-        string menmonic;
-        struct details {
-            short format;
-            string opcode;
-        } details;
-    };
+        // instruction menmonic and details pair
+        struct instr {
+            string menmonic;
+            struct details {
+                short format;
+                string opcode;
+            } details;
+        };
     
-    static const struct instr instrs[];
-    map<string, struct instr::details> opcodeTab;
+        // instruction array to load map
+        static const struct instr instrs[];
+        // instruction map
+        map<string, struct instr::details> opcodeTab;
 
 };
 
 #endif    
-

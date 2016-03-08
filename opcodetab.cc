@@ -75,15 +75,60 @@ const struct opcodetab::instr opcodetab::instrs[] = {
 };
 
 opcodetab::opcodetab(){
-    for (int i = 0; i < sizeof(instrs)/sizeof(instr); ++i) {
+    for (unsigned int i = 0; i < sizeof(instrs)/sizeof(instr); ++i) {
         opcodeTab.insert(pair<string, struct instr::details>(instrs[i].menmonic, instrs[i].details));
     }
 }
 
-int opcodetab::get_instruction_size(string str){
-    throw;
+int opcodetab::get_instruction_size(string s){
+    
+    if(s.size() == 0)
+        throw opcode_error_exception("Error: Opcode is empty string");
+    else{
+        string temp = s;
+        if(s[0] == '+')
+            s = s.erase(0,1);
+        transform(s.begin(), s.end(), s.begin(), ::tolower);
+        
+        map<string, struct instr::details>::iterator iter = opcodeTab.find(s);
+        
+        if(iter == opcodeTab.end())
+            throw opcode_error_exception("Error: Opcode "+s+" not found");
+        
+        struct instr::details A = iter->second;
+        if(A.format == 3 && temp[0] == '+'){
+            return 4;
+        }
+        else if(A.format != 3 && temp[0] == '+'){
+            throw opcode_error_exception("Error: Invalid use of + on Opcode "+s);
+        }
+        else{
+            return A.format;
+        }
+    }
 }
 
-string opcodetab::get_machine_code(string str) {
-    throw;
+string opcodetab::get_machine_code(string op) {
+    bool wasformat4 = false;
+    int i = 0;
+    
+    if (op[0] == '+')	{
+        op = op.erase(0,1);
+        wasformat4 = true;
+    }
+    while(op[i])	{
+        op[i] = tolower(op[i]);
+        i++;
+    }
+    map<string, struct instr::details>::iterator opct = opcodeTab.find(op);
+    
+    if(opct == opcodeTab.end())	{
+        throw opcode_error_exception("Error: Opcode "+op+" not found");
+    }
+    else if (opct->second.format != 3 && wasformat4) {
+        throw opcode_error_exception("Error: Invalid use of + on Opcode "+op);
+    }
+    else {
+        return opct->second.opcode;
+    }
 }
