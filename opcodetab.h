@@ -50,21 +50,7 @@ class opcodetab {
         // NOTE: the opcode must be prepended with a '+' for format 4.
         // throws an opcode_error_exception if the opcode is not 
         // found in the table.        
-        int get_instruction_size(string s){
-	    if(s.size() == 0 || opmap.find(s) == opmap.end())
-                throw opcode_error_exception("Error: Opcode is not valid");
-	    else{
-		struct opcodes* A = opmap.find(s)->second;
-	    	if(A.format() == 3 && s[0] == '+'){
-			return 4;
-		}
-		else if(A.format() != 3 && s[0] == '+'){
-			throw opcode_error_exception("Error: Invalid use of + on Opcode");
-		}
-		else{
-			return A.format();
-		}
-	    } 
+
     private:
         // your variables and private methods go here
         map<string, struct opcodes*> opcodeTab;

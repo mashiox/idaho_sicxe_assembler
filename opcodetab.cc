@@ -66,3 +66,25 @@ opcodetab{
     opcodeTab << pair<string, struct opcodes* > ( "TIXR"  , new struct opcodes(2  ,  184) );
     opcodeTab << pair<string, struct opcodes* > ( "WD"    , new struct opcodes(3,  220) );
 }
+
+
+
+int get_instruction_size(string s){
+
+    if(s.size() == 0)
+        throw opcode_error_exception("Error: Opcode is empty string");
+    else{
+        transform(s.begin(), s.end(), s.begin(), ::toupper);
+        if(opmap.find(s) == opmap.end())
+            throw opcode_error_exception("Error: Opcode not found");
+        struct opcodes* A = opmap.find(s)->second;
+        if(A.format() == 3 && s[0] == '+'){
+            return 4;
+        }
+        else if(A.format() != 3 && s[0] == '+'){
+            throw opcode_error_exception("Error: Invalid use of + on Opcode");
+        }
+        else{
+            return A.format();
+        }
+}
