@@ -1,0 +1,25 @@
+        string opcodetab::get_machine_code(string op)	{
+		char c, t;
+		int i = 0;
+	
+		if (op[0] == '+')	{
+			op = op.erase(0,1); // remove +
+		}
+		while(op[i])	{
+			c = op[i];
+			t = toupper(c); //change string to all uppercase
+			op[i] = t;
+			i++;
+		}
+		opcodetab *opct = new opcodetab();
+		
+		if(opct.find(op) == opct.end())	{  // opcode not found
+			throw opcode_error_exception();
+		}
+		else { //machine code
+			pair <string,int> *temp = opcodes(op);
+			return temp->second;
+		}
+	}
+
+
