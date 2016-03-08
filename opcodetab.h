@@ -1,6 +1,9 @@
-/*  opcodetab.h
-    CS530, Spring 2016
-*/
+/* Shad Aziz, Phillip Domann, Melanie Reed, Matt Walther
+   mascxxxx
+   Team Idaho
+   prog2
+   CS530, Spring 2016
+ */
 
 #ifndef OPCODETAB_H
 #define OPCODETAB_H
@@ -8,24 +11,6 @@
 #include <map>
 
 using namespace std;
-
-// map << operator
-// Usage: mymap << std::pair<K, V>(k1, v1) << std::pair<K,V>(k2, v2);
-// Equal to: mymap.insert( std::pair<K,V> (k1,v1) );
-//           mymap.insert( std::pair<K,V> (k2,v2) );
-map<std::string, struct opcodes*>& operator<<(map<std::string,struct opcodes*>& opmap, std::pair<std::string,struct opcodes*> p){
-	opmap.insert(p);
-	return opmap;
-}
-
-struct opcodes {
-        string format;
-        int opcode;
-        opcodes(string f, int o){
-            format = f;
-            opcode = o;
-        }
-};
 
 class opcodetab {
     public:
@@ -52,8 +37,17 @@ class opcodetab {
         int get_instruction_size(string);
                         
     private:
-        // your variables and private methods go here
-        map<string, struct opcodes*> opcodeTab;
+
+    struct instr {
+        string menmonic;
+        struct details {
+            short format;
+            string opcode;
+        } details;
+    };
+    
+    static const struct instr instrs[];
+    map<string, struct instr::details> opcodeTab;
 
 };
 
