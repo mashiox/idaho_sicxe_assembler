@@ -7,6 +7,7 @@
 
 #include <map>
 #include <string>
+#include <algorithm>
 #include "opcodetab.h"
 #include "opcode_error_exception.h"
 
