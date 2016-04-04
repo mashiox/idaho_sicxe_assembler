@@ -1,13 +1,37 @@
-#include <string>
+//#include <string>
 #include <sstream>
+#include "sicxe_asm.h"
 
 using namespace std;
 
-bool is_start( string opcode ){
-    return ( opcode.compare("START") == 0 ? true : false );
+/**
+* Auxiliary function,
+*/
+bool is_hex_string( string hex ){
+    if ( hex.length() == 0 ) return false;
+    
+    if ( hex.compare(0, 1, "x" ) == 0 ) return true;
+    return false;
 }
 
-void handle_start( int* start_address, string label ){
+/**
+* Auxiliary function, 
+*/
+bool is_char_string( string char_string ){
+    if ( char_string.length() == 0 ) return false;
+    
+    if ( char_string.compare(0, 1, "c" ) == 0 ) return true;
+    return false;
+}
+
+string get_byte_literal( string literal ){
+    // This is the wrong thing to do, we need to throw an exception instead.
+    if ( literal.length() == 0 ) return string("");
+    
+    return literal.substr( 2, literal.length()-3 ); 
+}
+
+void sicxe_asm::handle_start( int* start_address, string label ){
     /**
      * NB
      * start_address comes off the file as a hex string
@@ -29,40 +53,25 @@ void handle_start( int* start_address, string label ){
       */
 }
 
-
-bool is_end( string opcode ){
-    return ( opcode.compare("END") == 0 ? true : false );
-}
-
-void handle_end( string label ){
+void sicxe_asm::handle_end( string label ){
     /**
      * TODO
      * Set program length to LOCCTR.
      */
 }
 
-void handle_end(){
+void sicxe_asm::handle_end(){
     handle_end("");
 }
 
-
-bool is_word( string opcode ){
-    return ( opcode.compare("WORD") == 0 ? true : false );
-}
-
-void handle_word( int constant, string label ){
+void sicxe_asm::handle_word( int constant, string label ){
     /**
      * Save symtab[label] = constant
      * Increment LOCCTR by 3, locctr += 3
      */ 
 }
 
-
-bool is_resw( string opcode ){
-    return ( opcode.compare("RESW") == 0 ? true : false );
-}
-
-void handle_resw( int constant, string label ){
+void sicxe_asm::handle_resw( int constant, string label ){
     /**
         WARN: Unsure if this is the right approach to be compatible with SYMTAB.
         However, even if chars are stored in this space, they can be interpreted as ints
@@ -78,11 +87,7 @@ void handle_resw( int constant, string label ){
 }
 
 
-bool is_resb( string opcode ){
-    return ( opcode.compare("RESB") == 0 ? true : false );
-}
-
-void handle_resb( int constant, string label ){
+void sicxe_asm::handle_resb( int constant, string label ){
     /**
      * Same issue as handle_resw()
      */
@@ -92,38 +97,6 @@ void handle_resb( int constant, string label ){
      * save symtab[label] = reserved_space
      * increment locctr by constant, locctr += constant
      */
-}
-
-
-bool is_byte( string opcode ){
-    return ( opcode.compare("BYTE") == 0 ? true : false );
-}
-
-/**
- * Auxiliary function, either private, or not apart of a class.
- */
-bool is_hex_string( string hex ){
-    if ( hex.length() == 0 ) return false;
-    
-    if ( hex.compare(0, 1, "x" ) == 0 ) return true;
-    return false;
-}
-
-/**
- * Auxiliary function, either private, or not apart of a class.
- */
-bool is_char_string( string char_string ){
-    if ( char_string.length() == 0 ) return false;
-    
-    if ( char_string.compare(0, 1, "c" ) == 0 ) return true;
-    return false;
-}
-
-string get_byte_literal( string literal ){
-    // This is the wrong thing to do, we need to throw an exception instead.
-    if ( literal.length() == 0 ) return string("");
-    
-    return literal.substr( 2, literal.length()-3 ); 
 }
 
 int* string_to_int( string key ){
@@ -173,3 +146,4 @@ void handle_byte( string byte_code, string label ){
       * increment locctr by byte_length. locctr += byte_length.
       */
 }
+
