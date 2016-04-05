@@ -200,8 +200,8 @@ void sicxe_asm::handle_start() {
 	* Aux function to write intermediate file.
 	*/
 	
-	symtab[label] = startAddress
-	locctr = startAddress
+	symtab[label] = startAddress;
+	locctr = startAddress;
     addto_listing();
 }
 
