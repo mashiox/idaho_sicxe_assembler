@@ -9,10 +9,20 @@
 
 using namespace std;
 
+string itos(int integer) {
+    stringstream itoss;
+    itoss << integer;
+    return itoss.str();
+}
 
 bool is_start( string opcode ){
     transform(opcode.begin(), opcode.end(), opcode.begin(), ::toupper);
     return ( opcode.compare("START") == 0 ? true : false );
+}
+
+bool is_end( string opcode ){
+    transform(opcode.begin(), opcode.end(), opcode.begin(), ::toupper);
+    return ( opcode.compare("END") == 0 ? true : false );
 }
 
 sicxe_asm::sicxe_asm(string file) {
@@ -29,33 +39,45 @@ void sicxe_asm::pass1() {
     parser->read_file();
     
     unsigned int nlines = (unsigned int)parser->size();
-    while (index < nlines) {
+    for (index = 0; index < nlines; ++index) {
         get_tokens();
         if (is_start(opcode)) {
             handle_start();
             break;
-        } else if (!(opcode.empty() && operand.empty())) {
-            throw string("Error: there must be no operations before start directive.\n");
+        } else if (!opcode.empty()) {
+            throw string("Error: Line "+itos(index+1)+", There must be no operations before start directive.");
         } else {
-            addto_listing();
+            handle_empty();
         }
-        ++index;
     }
     
     if (index == nlines) {
-        //no start directive
+        throw string("Error: There is no start directive in sourcefile.");
     }
     sym_handler handle_symbol;
     for (++index; index < nlines; ++index) {
         get_tokens();
-        if (opcode.empty()) {
-            addto_listing();
-            continue;
+        if (is_end(opcode)) {
+            handle_end();
+            break;
         }
-        //handle to end directive
-        handle_symbol = handler_for_symbol();
-        (this->*handle_symbol)();
+        else {
+            handle_symbol = handler_for_symbol();
+            (this->*handle_symbol)();
+        }
     }
+    
+    if (index == nlines) {
+        throw string("Error: There is no end directive in sourcefile.");
+    }
+    for (++index; index < nlines; ++index) {
+        get_tokens();
+        if (!opcode.empty()) {
+            throw string("Error: Line "+itos(index+1)+" Additional operations exist after end directive.");
+        }
+        handle_empty();
+    }
+    
 }
 
 void sicxe_asm::get_tokens() {
@@ -66,15 +88,11 @@ void sicxe_asm::get_tokens() {
 }
 
 void sicxe_asm::listing_head(string filename) {
-	
+
 }
 
 void sicxe_asm::addto_listing() {
-    
-}
 
-void sicxe_asm::write_listing() {
-    
 }
 
 void sicxe_asm::print_listing() {
@@ -95,11 +113,14 @@ void sicxe_asm::setup_handler_map() {
 }
 
 sicxe_asm::sym_handler sicxe_asm::handler_for_symbol() {
+    if (opcode.empty()) {
+        return &sicxe_asm::handle_empty;
+    }
     string symbol = (opcode[0] == '+') ? opcode.substr(1, string::npos) : opcode;
     transform(symbol.begin(), symbol.end(), symbol.begin(), ::toupper);
     map<string, sym_handler>::iterator iter = hmap.find(symbol);
     if (iter == hmap.end()) {
-        throw string("Error: unhandeled opcode");
+        throw string("Error: Line "+itos(index+1)+", invalid opcode "+opcode+".");
     }
     return iter->second;
 }
@@ -143,6 +164,10 @@ void sicxe_asm::handle_nobase() {
 
 void sicxe_asm::handle_equ() {
 	addto_listing();
+}
+
+void sicxe_asm::handle_empty() {
+    addto_listing();
 }
 
 int main(int argc, char* argv[]) {
