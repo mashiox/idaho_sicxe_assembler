@@ -193,18 +193,24 @@ void sicxe_asm::get_tokens() {
 void sicxe_asm::listing_head(string filename) {
     int width = 38-(int)(filename.length()>>1);
     listing << setw(width) << "**" << filename << "**" << "\n\n";
-    listing << setw(5) << "Line#" << setw(8) << " Address" << setw(16);
-    listing << " Label" << setw(16) << "Opcode" << setw(36) << "Operand\n";
+    listing << setw(5) << "Line#";
+    listing << setw(8) << " Address";
+    listing << left << setw(16) << " Label";
+    listing << setw(16) << "Opcode";
+    listing << setw(36) << "Operand";
+    listing << endl;
     listing << setw(5) << "=====" << setw(8) << " =======" << setw(16);
-    listing << " =====" << setw(16) << "======" << setw(36) << "=======\n";
+    listing << " =====" << setw(16) << "======" << setw(36) << "=======";
+    listing << endl;
 }
 
 void sicxe_asm::listing_lnout() {
-    listing << setw(5) << dec << index+1;
+    listing << right << setw(5) << dec << index+1;
     listing << "   " << setw(5) << hex << uppercase << setfill('0') << locctr;
-    listing << setw(16) << setfill(' ') << label;
+    listing << " " << left << setw(15) << setfill(' ') << label;
     listing << setw(16) << opcode;
-    listing << setw(36) << operand << "\n";
+    listing << setw(36) << operand;
+    listing << endl;
 }
 
 void sicxe_asm::setup_handler_map() {
