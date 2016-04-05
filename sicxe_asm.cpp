@@ -1,175 +1,181 @@
+#include <iomanip>
+#include <iostream>
 #include <string>
 #include <sstream>
+#include <iostream>
+#include <fstream>
+#include "sicxe_asm.h"
+#include "file_parse_exception.h"
+#include "opcode_error_exception.h"
+#include "symtab_exception.h"
 
 using namespace std;
 
+
 bool is_start( string opcode ){
+    transform(opcode.begin(), opcode.end(), opcode.begin(), ::toupper);
     return ( opcode.compare("START") == 0 ? true : false );
 }
 
-void handle_start( int* start_address, string label ){
-    /**
-     * NB
-     * start_address comes off the file as a hex string
-     * use string_to_hex( string ) to convert to int*.
-     */
-     
-    /**
-     * TODO
-     * Save symtab[label] = start_address
-     * 
-     * Set LOCCTR to start_address
-     * 
-     * Aux function to write intermediate file.
-     */
-     
-     /**
-      * NEEDS
-      * Aux function for hex str -> int
-      */
+sicxe_asm::sicxe_asm(string file) {
+    parser = new file_parser(file);
+    setup_handler_map();
+    string listingFile = file.substr(0, file.find(".",0));
+    listingFile = listingFile + ".lis";
+    listing.open(ListingFile);
+    listing_head(ListingFile);
 }
 
-
-bool is_end( string opcode ){
-    return ( opcode.compare("END") == 0 ? true : false );
+sicxe_asm::~sicxe_asm() {
+    delete parser;
 }
 
-void handle_end( string label ){
-    /**
-     * TODO
-     * Set program length to LOCCTR.
-     */
-}
-
-void handle_end(){
-    handle_end("");
-}
-
-
-bool is_word( string opcode ){
-    return ( opcode.compare("WORD") == 0 ? true : false );
-}
-
-void handle_word( int constant, string label ){
-    /**
-     * Save symtab[label] = constant
-     * Increment LOCCTR by 3, locctr += 3
-     */ 
-}
-
-
-bool is_resw( string opcode ){
-    return ( opcode.compare("RESW") == 0 ? true : false );
-}
-
-void handle_resw( int constant, string label ){
-    /**
-        WARN: Unsure if this is the right approach to be compatible with SYMTAB.
-        However, even if chars are stored in this space, they can be interpreted as ints
-            because of ASCII.
-        It might be good if SYMTAB was a map of int*s though... then everything is consistent.
-     */
-    int* reserved_space = new int[ 3*constant ];
-    /**
-     * Save symtab[label] = reserved_space;
-     * 
-     * Increment locctr by 3*constant, locctr += 3*constant
-     */
-}
-
-
-bool is_resb( string opcode ){
-    return ( opcode.compare("RESB") == 0 ? true : false );
-}
-
-void handle_resb( int constant, string label ){
-    /**
-     * Same issue as handle_resw()
-     */
-    int* reserved_space = new int[ constant ];
-    /**
-     * TODO
-     * save symtab[label] = reserved_space
-     * increment locctr by constant, locctr += constant
-     */
-}
-
-
-bool is_byte( string opcode ){
-    return ( opcode.compare("BYTE") == 0 ? true : false );
-}
-
-/**
- * Auxiliary function, either private, or not apart of a class.
- */
-bool is_hex_string( string hex ){
-    if ( hex.length() == 0 ) return false;
+void sicxe_asm::pass1() {
+    parser->read_file();
     
-    if ( hex.compare(0, 1, "x" ) == 0 ) return true;
-    return false;
-}
-
-/**
- * Auxiliary function, either private, or not apart of a class.
- */
-bool is_char_string( string char_string ){
-    if ( char_string.length() == 0 ) return false;
+    unsigned int nlines = (unsigned int)parser->size();
+    while (index < nlines) {
+        get_tokens();
+        if (is_start(opcode)) {
+            handle_start();
+            break;
+        } else if (!(opcode.empty() && operand.empty())) {
+            throw string("Error: there must be no operations before start directive.\n");
+        } else {
+            addto_listing();
+        }
+        ++index;
+    }
     
-    if ( char_string.compare(0, 1, "c" ) == 0 ) return true;
-    return false;
+    if (index == nlines) {
+        //no start directive
+    }
+    sym_handler handle_symbol;
+    for (++index; index < nlines; ++index) {
+        get_tokens();
+        if (opcode.empty()) {
+            addto_listing();
+            continue;
+        }
+        //handle to end directive
+        handle_symbol = handler_for_symbol();
+        (this->*handle_symbol)();
+    }
 }
 
-string get_byte_literal( string literal ){
-    // This is the wrong thing to do, we need to throw an exception instead.
-    if ( literal.length() == 0 ) return string("");
+void sicxe_asm::get_tokens() {
+    label = parser->get_token(index, 0);
+    opcode = parser->get_token(index, 1);
+    operand = parser->get_token(index, 2);
+    comment = parser->get_token(index, 3);
+}
+
+void sicxe_asm::listing_head(string filename) {
+	listing << "Line#" << setw(16) << "Address" << setw(16) <<"Label" << setw(16) << "Opcode" << setw(36) << "Operand\n";
+	listing << "=====" << setw(16) << "=======" << setw(16) <<"=====" << setw(16) << "======" << setw(36) << "=======\n";
+}
+
+void sicxe_asm::addto_listing() {
+    listing << dec << index+1 << setw(16) << hex << uppercase << setfill("0") << locctr << setw(16) << setfill(" ") << label << setw(16) << opcode << setw(36) << operand << "\n";
+}
+
+//void sicxe_asm::write_listing() {
+//    listing.str() << ;
+//}
+
+//void sicxe_asm::print_listing() {
+//    cout << listing.str();
+//}
+
+void sicxe_asm::setup_handler_map() {
+    unsigned int i;
+    for (i = 0; i < sizeof(opcodetab::instrs)/sizeof(opcodetab::instr); ++i) {
+        string instruction = opcodetab::instrs[i].menmonic;
+        transform(instruction.begin(), instruction.end(), instruction.begin(), ::toupper);
+        hmap.insert(make_pair(instruction, &sicxe_asm::handle_instruction));
+    }
     
-    return literal.substr( 2, literal.length()-3 ); 
+    for (i = 0; i < sizeof(sicxe_asm::dhpairs)/sizeof(sicxe_asm::dhpair); ++i) {
+        hmap.insert(make_pair(sicxe_asm::dhpairs[i].directive, sicxe_asm::dhpairs[i].handler));
+    }
 }
 
-int* string_to_int( string key ){
-    int* iptr = new int[ key.length() ];
-    for ( size_t index = 0 ; index < key.length() ; index++ ){
-        *( iptr + index ) = (int)key[index];
+sicxe_asm::sym_handler sicxe_asm::handler_for_symbol() {
+    string symbol = (opcode[0] == '+') ? opcode.substr(1, string::npos) : opcode;
+    transform(symbol.begin(), symbol.end(), symbol.begin(), ::toupper);
+    map<string, sym_handler>::iterator iter = hmap.find(symbol);
+    if (iter == hmap.end()) {
+        throw string("Error: unhandeled opcode");
     }
-    return iptr;
+    return iter->second;
 }
 
-int* string_to_hex( string literal ){
-    int *iptr = new int[ 1 ];
-    stringstream ss;
-    ss << std::hex << literal;
-    ss >> *iptr;
-    return iptr;
+void sicxe_asm::handle_instruction() {
+    int size = optab.get_instruction_size(opcode);
+    addto_listing();
+    locctr += size;
+}
+void sicxe_asm::handle_start() {
+	addto_listing();
 }
 
-void handle_byte( string byte_code, string label ){
-    string literal;
-    size_t byte_length;
-    int* int_code;
-    /**
-     * BYTE x'abcd' case
-     */ 
-    if ( is_hex_string(byte_code) ){
-        literal = get_byte_literal( byte_code );
-        if ( literal.length() != 4 ) return; // TODO, THROW EXCEPTION
-        byte_length = 4;
-        int_code = string_to_hex( literal );
+void sicxe_asm::handle_end() {
+	addto_listing();
+}
+
+void sicxe_asm::handle_byte() {
+	addto_listing();
+}
+
+void sicxe_asm::handle_word() {
+	addto_listing();
+}
+
+void sicxe_asm::handle_resb() {
+	addto_listing();
+}
+
+void sicxe_asm::handle_resw() {
+	addto_listing();
+}
+
+void sicxe_asm::handle_base() {
+	addto_listing();
+}
+
+void sicxe_asm::handle_nobase() {
+	addto_listing();
+}
+
+void sicxe_asm::handle_equ() {
+	addto_listing();
+}
+
+int main(int argc, char* argv[]) {
+    if (argc != 2) {
+        cout << "Proper usage is " << argv[0] << " filename. " << endl;
     }
-    /**
-     * BYTE c'abcdefg' case
-     */
-    else if ( is_char_string(byte_code) ){
-        literal = get_byte_literal( byte_code );
-        byte_length = literal.length();
-        int_code = string_to_int( literal );
+    
+    sicxe_asm assembler(argv[1]);
+    
+    try {
+    	assembler.pass1();
+    	//assembler.write_listing();
+    	assembler.print_listing();
+        return 0;
     }
-    else {
-        // THROW EXCEPTION
+    catch (file_parse_exception fpe) {
+        cout << fpe.getMessage();
     }
-     
-     /**
-      * TODO
-      * Save symtab[label] = int_code
-      * increment locctr by byte_length. locctr += byte_length.
-      */
+    catch (opcode_error_exception oee) {
+        cout << oee.getMessage();
+    }
+    catch (symtab_exception se) {
+        cout << se.getMessage();
+    }
+    catch (string str) {
+        cout << str;
+    }
+    
+    return 1;
 }
