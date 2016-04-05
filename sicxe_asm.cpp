@@ -168,7 +168,7 @@ int main(int argc, char* argv[]) {
     try {
     	assembler.pass1();
     	//assembler.write_listing();
-    	assembler.print_listing();
+    	//assembler.print_listing();
         return 0;
     }
     catch (file_parse_exception fpe) {
