@@ -47,7 +47,6 @@ bool is_char_string( string char_string ){
 }
 
 string get_byte_literal( string literal ){
-	// This is the wrong thing to do, we need to throw an exception instead.
 	if ( literal.length() == 0 ) return string("");
 	
 	return literal.substr( 2, literal.length()-3 );
@@ -214,7 +213,7 @@ void sicxe_asm::handle_byte() {
 	*/
 	if ( is_hex_string(operand) ){
 		literal = get_byte_literal( operand );
-		if ( literal.length() != 4 ) return; // TODO, THROW EXCEPTION
+		if ( literal.length() != 4 ) throw symtab_exception("Error: Invalid Hex Digit");
 		byte_length = 4;
         int_code = string_to_hex( literal );
     }
@@ -227,7 +226,7 @@ void sicxe_asm::handle_byte() {
 		int_code = string_to_int( literal );
     }
 	else {
-    	throw symtab_exception("Error: Invalid Hex Digit");
+    	throw symtab_exception("Error: Invalid String Literal");
     }
     symbols.add( label, int_code );
 	locctr += byte_length;
@@ -281,7 +280,7 @@ void sicxe_asm::handle_nobase() {
 }
 
 void sicxe_asm::handle_equ() {
-    if ( !operand.length() ) return; // THROW EXCEPTION
+    if ( !operand.length() ) throw symtab_exception("Error: Invalid Operand");
     int* value = 0;
     if ( operand[0] == '$' ){
         value = string_to_hex( operand.substr( 1, operand.length()-1 ) );
