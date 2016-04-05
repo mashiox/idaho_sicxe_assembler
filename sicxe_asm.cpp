@@ -1,3 +1,10 @@
+/* Shad Aziz, Phillip Domann, Melanie Reed, Matt Walther
+ mascxxxx
+ Team Idaho
+ prog3
+ CS530, Spring 2016
+ */
+
 #include <iomanip>
 #include <iostream>
 #include <string>
@@ -13,6 +20,43 @@ string itos(int integer) {
     stringstream itoss;
     itoss << integer;
     return itoss.str();
+}
+
+bool is_hex_string( string hex ){
+	if ( hex.length() == 0 ) return false;
+	
+	if ( hex.compare(0, 1, "x" ) == 0 ) return true;
+	return false;
+}
+
+bool is_char_string( string char_string ){
+	if ( char_string.length() == 0 ) return false;
+	
+	if ( char_string.compare(0, 1, "c" ) == 0 ) return true;
+	return false;
+}
+
+string get_byte_literal( string literal ){
+	// This is the wrong thing to do, we need to throw an exception instead.
+	if ( literal.length() == 0 ) return string("");
+	
+	return literal.substr( 2, literal.length()-3 );
+}
+
+int* string_to_int( string key ){
+	int* iptr = new int[ key.length() ];
+	for ( size_t idx = 0 ; idx < key.length() ; idx++ ){
+		( iptr +idx ) = (int)key[idx];
+    }
+    return iptr;
+}
+
+int* string_to_hex( string literal ){
+	int *iptr = new int[ 1 ];
+	stringstream ss;
+	ss << std::hex << literal;
+    ss >> *iptr;
+	return iptr;
 }
 
 bool is_start( string opcode ){
@@ -88,11 +132,26 @@ void sicxe_asm::get_tokens() {
 }
 
 void sicxe_asm::listing_head(string filename) {
-
+    listing << "**" << filename << "**" << endl;
+    listing << endl;
+    listing << setw(line_width) << "Line#";
+    listing << setw(address_width) << "Address";
+    listing << setw(label_width) << "Label";
+    listing << setw(opcode_width) << "Opcode";
+    listing << setw(operand_width) << "Operand" << endl;
+    listing << setw(line_width) << "=====";
+    listing << setw(address_width) << "=======";
+    listing << setw(label_width) << "=====";
+    listing << setw(opcode_width) << "======";
+    listing << setw(operand_width) << "=======" << endl;
 }
 
 void sicxe_asm::addto_listing() {
-
+    listing << setw(line_width) << right << dec << index+1;
+    listing << "   " << setfill('0') << setw(address_width-3) << hex << uppercase << locctr;
+    listing << setfill(' ') << setw(label_width) << label;
+    listing << setw(opcode_width) << opcode;
+    listing << setw(operand_width) << operand << endl;
 }
 
 void sicxe_asm::print_listing() {
@@ -131,26 +190,104 @@ void sicxe_asm::handle_instruction() {
     locctr += size;
 }
 void sicxe_asm::handle_start() {
+    /**
+    * NB
+	* start_address comes off the file as a hex string
+	* use string_to_hex( string ) to convert to int*.
+ 	*/
+	
+	/**
+	* TODO
+	* Save symtab[label] = start_address
+	*
+	* Set LOCCTR to start_address
+	*
+	* Aux function to write intermediate file.
+	*/
+
+	/**
+	* NEEDS
+	* Aux function for hex str -> int
+	*/
     addto_listing();
 }
 
 void sicxe_asm::handle_end() {
+    /**
+	* TODO
+	* Set program length to LOCCTR.
+	*/
 	addto_listing();
 }
 
 void sicxe_asm::handle_byte() {
+    string literal;
+	size_t byte_length;
+	int* int_code;
+	/**
+	* BYTE x'abcd' case
+	*/
+	if ( is_hex_string(operand) ){
+		literal = get_byte_literal( operand );
+		if ( literal.length() != 4 ) return; // TODO, THROW EXCEPTION
+		byte_length = 4;
+        int_code = string_to_hex( literal );
+    }
+	/**
+	* BYTE c'abcdefg' case
+	*/
+	else if ( is_char_string(operand) ){
+		literal = get_byte_literal( operand );
+		byte_length = literal.length();
+		int_code = string_to_int( literal );
+    }
+	else {
+	// THROW EXCEPTION
+	/**
+	* TODO
+	* Save symtab[label] = int_code
+	* increment locctr by byte_length. locctr += byte_length.
+	*/
+    }
 	addto_listing();
 }
 
 void sicxe_asm::handle_word() {
+    /**
+	* Save symtab[label] = constant
+	* Increment LOCCTR by 3, locctr += 3
+	*/
 	addto_listing();
 }
 
 void sicxe_asm::handle_resb() {
+    /**
+	* Same issue as handle_resw()
+	*/
+    //convert operand to int and add to locctr
+	//int* reserved_space = new int[ operand ];
+	/**
+    * TODO
+	* save symtab[label] = reserved_space
+	* increment locctr by constant, locctr += constant
+	*/
 	addto_listing();
 }
 
 void sicxe_asm::handle_resw() {
+    /**
+	WARN: Unsure if this is the right approach to be compatible with SYMTAB.
+	However, even if chars are stored in this space, they can be interpreted as ints
+	because of ASCII.
+	It might be good if SYMTAB was a map of int*s though... then everything is consistent.
+	*/
+    //convert operand to int and add to locctr
+	//int* reserved_space = new int[ 3*operand ];
+	/**
+	* Save symtab[label] = reserved_space;
+	*
+	* Increment locctr by 3*constant, locctr += 3*constant
+	*/
 	addto_listing();
 }
 
