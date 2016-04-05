@@ -1,0 +1,5 @@
+*.o
+sicxeoptab
+parsesicxe
+test/
+*.asm
