@@ -49,7 +49,8 @@ bool ishexadecimal(string& str, size_t start, size_t end) {
 bool isconstant(string& str) {
     if (str.empty())
         return false;
-    return (str[0] == '$') ? ishexadecimal(str, 1, str.length()) : isdecimal(str, 0, str.length());
+    return (str[0] == '$') ? ishexadecimal(str, 1, str.length())
+    	: isdecimal(str, 0, str.length());
 }
 
 int ctoi(string& str) {
@@ -72,7 +73,8 @@ bool isliteral(string& str) {
 }
 
 unsigned int size_for_literal(string& str) {
-    return ((str[0] == 'c') || (str[0] == 'C')) ? (unsigned int)str.length()-3: (unsigned int)(str.length()-3)>>1;
+    return ((str[0] == 'c') || (str[0] == 'C')) ? (unsigned int)str.length()-3
+    	: (unsigned int)(str.length()-3)>>1;
 }
 
 string itos(int integer) {
@@ -179,7 +181,6 @@ void sicxe_asm::pass1() {
             error_ln_str("Additional operations cannot exist after end directive.");
         }
     }
-    
 }
 
 void sicxe_asm::get_tokens() {
@@ -209,13 +210,14 @@ void sicxe_asm::listing_lnout() {
 void sicxe_asm::setup_handler_map() {
     unsigned int i;
     for (i = 0; i < sizeof(opcodetab::instrs)/sizeof(opcodetab::instr); ++i) {
-        string instruction = opcodetab::instrs[i].menmonic;
-        transform(instruction.begin(), instruction.end(), instruction.begin(), ::toupper);
-        hmap.insert(make_pair(instruction, &sicxe_asm::handle_instruction));
+        string instr = opcodetab::instrs[i].menmonic;
+        transform(instr.begin(), instr.end(), instr.begin(), ::toupper);
+        hmap.insert(make_pair(instr, &sicxe_asm::handle_instruction));
     }
     
     for (i = 0; i < sizeof(sicxe_asm::dhpairs)/sizeof(sicxe_asm::dhpair); ++i) {
-        hmap.insert(make_pair(sicxe_asm::dhpairs[i].directive, sicxe_asm::dhpairs[i].handler));
+        hmap.insert(make_pair(sicxe_asm::dhpairs[i].directive,
+        	sicxe_asm::dhpairs[i].handler));
     }
 }
 
