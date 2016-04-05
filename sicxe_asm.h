@@ -25,7 +25,7 @@ class sicxe_asm {
     vector<unsigned int> line_addrs;
     unsigned int index;
     unsigned int locctr = 0;
-    unsigned int startAddress = 0;
+    unsigned int programLength = 0;
     string label;
     string opcode;
     string operand;
