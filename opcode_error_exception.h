@@ -5,8 +5,8 @@
    CS530, Spring 2016
  */
 
-#ifndef opcode_error_exception_h
-#define opcode_error_exception_h
+#ifndef OPCODE_ERROR_EXCEPTION_H
+#define OPCODE_ERROR_EXCEPTION_H
 
 using namespace std;
 
