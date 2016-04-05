@@ -318,6 +318,7 @@ void sicxe_asm::add_symbol_for_label() {
 int main(int argc, char* argv[]) {
     if (argc != 2) {
         cout << "Proper usage is " << argv[0] << " filename. " << endl;
+        return 1;
     }
     
     sicxe_asm assembler(argv[1]);
