@@ -13,12 +13,6 @@
 #include "opcodetab.h"
 #include "symtab.h"
 
-#define line_width     7
-#define address_width  8
-#define label_width    9
-#define opcode_width   8
-#define operand_width  28
-
 using namespace std;
 
 class sicxe_asm {
