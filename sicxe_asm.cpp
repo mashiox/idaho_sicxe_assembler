@@ -18,6 +18,14 @@
 
 using namespace std;
 
+int hextoi(string& str) {
+    int integer;
+    stringstream ss;
+    ss << hex << str;
+    ss >> integer;
+    return integer;
+}
+
 string itos(int integer) {
     stringstream itoss;
     itoss << integer;
@@ -284,6 +292,12 @@ void sicxe_asm::handle_resw() {
 }
 
 void sicxe_asm::handle_base() {
+    int* value = 0; //NULL PTR, UNDEFINED VALUE
+    if ( symbols.exists( operand ) ){
+        value = symbols.get( operand );
+    }
+    symbols.add( operand, value );
+    
 	addto_listing();
 }
 
@@ -292,6 +306,17 @@ void sicxe_asm::handle_nobase() {
 }
 
 void sicxe_asm::handle_equ() {
+    if ( !operand.length() ) return; // THROW EXCEPTION
+    int* value = 0;
+    if ( operand[0] == '$' ){
+        value = string_to_hex( operand.substr( 1, operand.length()-1 ) );
+    }
+    else if ( symbols.exists( operand ) ) {
+        value = symbols.get( operand );
+    }
+    
+    symbols.add( label, value );
+    
 	addto_listing();
 }
 
