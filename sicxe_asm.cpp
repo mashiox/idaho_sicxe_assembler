@@ -193,31 +193,14 @@ void sicxe_asm::handle_instruction() {
     locctr += size;
 }
 void sicxe_asm::handle_start() {
-    /**
-    * NB
-	* start_address comes off the file as a hex string
-	* use string_to_hex( string ) to convert to int*.
- 	*/
 	int* startAddress = string_to_int(start_address);
-	/**
-	* TODO
-	* Save symtab[label] = start_address
-	*
-	* Set LOCCTR to start_address
-	*
-	* Aux function to write intermediate file.
-	*/
 	
-	symtab[label] = startAddress;
+    symbols.add( label, startAddress );
 	locctr = startAddress;
     addto_listing();
 }
 
 void sicxe_asm::handle_end() {
-    /**
-	* TODO
-	* Set program length to LOCCTR.
-	*/
 	programLength = locctr;
 	addto_listing();
 }
@@ -244,55 +227,29 @@ void sicxe_asm::handle_byte() {
 		int_code = string_to_int( literal );
     }
 	else {
-	// THROW EXCEPTION
-	/**
-	* TODO
-	* Save symtab[label] = int_code
-	* increment locctr by byte_length. locctr += byte_length.
-	*/
-	throw symtab_exception("Error: Invalid Hex Digit");
-	symtab[label] = int_code;
-	locctr += byte_length;
+    	throw symtab_exception("Error: Invalid Hex Digit");
     }
+    symbols.add( label, int_code );
+	locctr += byte_length;
 	addto_listing();
 }
 
 void sicxe_asm::handle_word() {
-    /**
-	* Save symtab[label] = constant
-	* Increment LOCCTR by 3, locctr += 3
-	*/
-	symtab[label] = constant;
+    symbols.add( label, string_to_int(operand) );
 	locctr += 3;
 	addto_listing();
 }
 
 void sicxe_asm::handle_resb() {
-    /**
-	* Same issue as handle_resw()
-	*/
-    //convert operand to int and add to locctr
-	//int* reserved_space = new int[ operand ];
-	/**
-    * TODO
-	* save symtab[label] = reserved_space
-	* increment locctr by constant, locctr += constant
-	*/
-	int intOperand= string_to_int(operand);
-	locctr += intOperand;
+	int* intOperand = string_to_int(operand);
 	int* reserved_space = new int[intOperand];
-	symtab[label] = reserved_space;
-	locctr += constant;
+    symbols.add( label, reserved_space );
+	
+	locctr += intOperand;
 	addto_listing();
 }
 
 void sicxe_asm::handle_resw() {
-    /**
-	WARN: Unsure if this is the right approach to be compatible with SYMTAB.
-	However, even if chars are stored in this space, they can be interpreted as ints
-	because of ASCII.
-	It might be good if SYMTAB was a map of int*s though... then everything is consistent.
-	*/
     //convert operand to int and add to locctr
 	//int* reserved_space = new int[ 3*operand ];
 	/**
@@ -300,12 +257,12 @@ void sicxe_asm::handle_resw() {
 	*
 	* Increment locctr by 3*constant, locctr += 3*constant
 	*/
-	int intOperand= string_to_int(operand);
-	locctr += intOperand;
-	int* reserved_space = new int[3*intOperand];
-	symtab[label] = reserved_space;
-	locctr += 3*constant;
+	int* intOperand = string_to_int(operand);
+    int constant = *intOperand;
+	int* reserved_space = new int[3*constant];
+    symbols.add( label, reserved_space );
 	
+	locctr += 3*constant;
 	addto_listing();
 }
 
