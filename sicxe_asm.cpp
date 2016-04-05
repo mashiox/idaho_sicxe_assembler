@@ -9,6 +9,8 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <iostream>
+#include <fstream>
 #include "sicxe_asm.h"
 #include "file_parse_exception.h"
 #include "opcode_error_exception.h"
@@ -72,7 +74,10 @@ bool is_end( string opcode ){
 sicxe_asm::sicxe_asm(string file) {
     parser = new file_parser(file);
     setup_handler_map();
-    listing_head(file);
+    string listingFile = file.substr(0, file.find(".",0));
+    listingFile = listingFile + ".lis";
+    listing.open(listingFile.c_str());
+    listing_head(listingFile);
 }
 
 sicxe_asm::~sicxe_asm() {
@@ -132,16 +137,21 @@ void sicxe_asm::get_tokens() {
 }
 
 void sicxe_asm::listing_head(string filename) {
-
+	listing << "Line#" << setw(16) << "Address" << setw(16) <<"Label" << setw(16) << "Opcode" << setw(36) << "Operand\n";
+	listing << "=====" << setw(16) << "=======" << setw(16) <<"=====" << setw(16) << "======" << setw(36) << "=======\n";
 }
 
 void sicxe_asm::addto_listing() {
-
+    listing << dec << index+1 << setw(16) << hex << uppercase << setfill('0') << locctr << setw(16) << setfill(' ') << label << setw(16) << opcode << setw(36) << operand << "\n";
 }
 
-void sicxe_asm::print_listing() {
-    cout << listing.str();
-}
+//void sicxe_asm::write_listing() {
+//    listing.str() << ;
+//}
+
+//void sicxe_asm::print_listing() {
+//    cout << listing.str();
+//}
 
 void sicxe_asm::setup_handler_map() {
     unsigned int i;
@@ -302,7 +312,7 @@ int main(int argc, char* argv[]) {
     try {
     	assembler.pass1();
     	//assembler.write_listing();
-    	assembler.print_listing();
+    	//assembler.print_listing();
         return 0;
     }
     catch (file_parse_exception fpe) {

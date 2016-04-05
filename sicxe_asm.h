@@ -29,7 +29,7 @@ class sicxe_asm {
     string opcode;
     string operand;
     string comment;
-    stringstream listing;
+    ofstream listing;
     
     struct dhpair {
         string directive;
