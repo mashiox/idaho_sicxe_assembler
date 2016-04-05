@@ -35,9 +35,6 @@ class opcodetab {
         // NOTE: the opcode must be prepended with a '+' for format 4.
         // throws an opcode_error_exception if the opcode is not 
         // found in the table.        
-<<<<<<< HEAD
-
-=======
         int get_instruction_size(string);
                         
     
@@ -53,7 +50,6 @@ class opcodetab {
         // instruction array to load map
     	static const struct instr instrs[59];
     
->>>>>>> b10a4ebf6cffc3c0db9104d9ec71024b67891289
     private:
         // instruction map
         map<string, struct instr::details> opcodeTab;
