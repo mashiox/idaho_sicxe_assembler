@@ -13,12 +13,6 @@
 #include "opcodetab.h"
 #include "symtab.h"
 
-#define line_width 5
-#define address_width 8
-#define label_width 9
-#define opcode_width 7
-#define operand_width 28
-
 using namespace std;
 
 class sicxe_asm {
@@ -28,7 +22,8 @@ class sicxe_asm {
     opcodetab optab;
     symtab symbols;
     map<string, sym_handler> hmap;
-    unsigned int index = 0;
+    vector<unsigned int> line_addrs;
+    unsigned int index;
     unsigned int locctr = 0;
     string label;
     string opcode;
@@ -69,13 +64,13 @@ class sicxe_asm {
     void handle_base();
     void handle_nobase();
     void handle_equ();
+    void handle_empty();
     
 public:
     sicxe_asm(string file);
     ~sicxe_asm();
     
     void pass1();
-    void write_listing();
     void print_listing();
     
 };
