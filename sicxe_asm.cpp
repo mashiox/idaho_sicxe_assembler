@@ -1,3 +1,10 @@
+/* Phillip Domann, Shad Aziz, Melanie Reed, Matt Walther
+   masc0832
+   Team Idaho
+   prog3
+   CS530, Spring 2016
+*/
+
 #include <iomanip>
 #include <iostream>
 #include <string>
