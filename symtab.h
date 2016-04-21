@@ -19,13 +19,13 @@ using namespace std;
  class symtab {
  public:
       	symtab();
-  	void add(string, int*);
- 	int* get(string);
- 	bool exists(string);
+      	void add(string, string);
+        string get(string);
+        bool exists(string);
 
  private:
-      	map<string, int*> symbol_table;
-	map<string, int*>::iterator symbol_iter;
+      	map<string, string> symbol_table;
+        map<string, string>::iterator symbol_iter;
  };
 
  #endif

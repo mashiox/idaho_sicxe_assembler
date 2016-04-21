@@ -1,4 +1,4 @@
-/* Phillip Domann, Shad Aziz, Melanie Reed, Matt Walther
+/* Shad Aziz, Phillip Domann, Melanie Reed, Matt Walther
    masc0832
    Team Idaho
    prog3
@@ -18,14 +18,13 @@ using namespace std;
 class sicxe_asm {
     typedef void (sicxe_asm::*sym_handler)();
     
-    file_parser* parser = NULL;
+    file_parser* parser;
     opcodetab optab;
     symtab symbols;
     map<string, sym_handler> hmap;
     vector<unsigned int> line_addrs;
     unsigned int index;
-    unsigned int locctr = 0;
-    unsigned int programLength = 0;
+    unsigned int locctr;
     string label;
     string opcode;
     string operand;
@@ -37,42 +36,33 @@ class sicxe_asm {
         sym_handler handler;
     };
     
-    const struct dhpair dhpairs[9] = {
-        {"START", &sicxe_asm::handle_start},
-        {"END", &sicxe_asm::handle_end},
-        {"BYTE", &sicxe_asm::handle_byte},
-        {"WORD", &sicxe_asm::handle_word},
-        {"RESB", &sicxe_asm::handle_resb},
-        {"RESW", &sicxe_asm::handle_resw},
-        {"BASE", &sicxe_asm::handle_base},
-        {"NOBASE", &sicxe_asm::handle_nobase},
-        {"EQU", &sicxe_asm::handle_equ}
-    };
+    static const struct dhpair dhpairs[9];
     
     void get_tokens();
     void listing_head(string filename);
-    void addto_listing();
+    void listing_lnout();
     
     void setup_handler_map();
     sym_handler handler_for_symbol();
     void handle_instruction();
     void handle_start();
-    void handle_end();
-    void handle_byte();
-    void handle_word();
+    void handle_byte_word();
     void handle_resb();
     void handle_resw();
-    void handle_base();
-    void handle_nobase();
     void handle_equ();
+    void handle_directive();
     void handle_empty();
+    
+    void add_symbol_for_label();
+    
+    void error_str(string msg);
+    void error_ln_str(string msg);
     
 public:
     sicxe_asm(string file);
     ~sicxe_asm();
     
     void pass1();
-    void print_listing();
     
 };
 
