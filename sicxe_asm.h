@@ -18,6 +18,7 @@ using namespace std;
 class sicxe_asm {
     typedef void (sicxe_asm::*sym_handler)();
     
+    string intermed_filen;
     file_parser* parser;
     opcodetab optab;
     symtab symbols;
@@ -63,6 +64,8 @@ public:
     ~sicxe_asm();
     
     void pass1();
+    
+    void pass2();
     
 };
 

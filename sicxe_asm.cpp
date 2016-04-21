@@ -11,6 +11,7 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 #include "sicxe_asm.h"
 #include "file_parse_exception.h"
 #include "opcode_error_exception.h"
@@ -18,7 +19,7 @@
 
 using namespace std;
 
-int hextoi(string& str) {
+int hextoi(string str) {
     int integer;
     stringstream ss;
     ss << hex << str;
@@ -54,7 +55,7 @@ bool isconstant(string& str) {
 }
 
 int ctoi(string& str) {
-    return (str[0] == '$') ? hextoi(str.substr(1)): atoi(str.c_str());
+    return (str[0] == '$') ? hextoi(str.substr(1)) : hextoi(str);
 }
 
 bool isquoted(string& str) {
@@ -106,6 +107,7 @@ const struct sicxe_asm::dhpair sicxe_asm::dhpairs[9] = {
 };
 
 sicxe_asm::sicxe_asm(string file) {
+    intermed_filen = file;
     parser = new file_parser(file);
     locctr = 0;
     setup_handler_map();
@@ -179,6 +181,18 @@ void sicxe_asm::pass1() {
         listing_lnout();
         if (!opcode.empty()) {
             error_ln_str("Additional operations cannot exist after end directive.");
+        }
+    }
+}
+
+void sicxe_asm::pass2() {
+    parser = new file_parser(file);
+    
+    unsigned int nlines = (unsigned int)parser->size();
+    for ( index = 0 ; index < nlines ; index++ ){
+        get_tokens();
+        if ( is_start(opcode) ){
+            
         }
     }
 }
@@ -334,7 +348,6 @@ int main(int argc, char* argv[]) {
     
     try {
     	assembler.pass1();
-        return 0;
     }
     catch (file_parse_exception fpe) {
         cout << fpe.getMessage();
@@ -347,6 +360,11 @@ int main(int argc, char* argv[]) {
     }
     catch (string str) {
         cout << str;
+    }
+    
+    try {
+        assembler.pass2();
+        return 0;
     }
     
     return 1;
