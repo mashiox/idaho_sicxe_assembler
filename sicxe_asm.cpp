@@ -18,6 +18,8 @@
 
 using namespace std;
 
+
+// Converts a hex string to an integer value
 int hextoi(string str) {
     int integer;
     stringstream ss;
@@ -26,6 +28,8 @@ int hextoi(string str) {
     return integer;
 }
 
+
+// Checks that a string range contains only digits
 bool isdecimal(string& str, size_t start, size_t end) {
     for (size_t i = start; i < end; ++i) {
         if (!isdigit(str[i])) {
@@ -35,6 +39,8 @@ bool isdecimal(string& str, size_t start, size_t end) {
     return true;
 }
 
+
+// Checks that a string range contains only hexadecimal digits
 bool ishexadecimal(string& str, size_t start, size_t end) {
     string upper = str;
     transform(upper.begin(),upper.end(), upper.begin(), ::toupper);
@@ -46,6 +52,7 @@ bool ishexadecimal(string& str, size_t start, size_t end) {
     return true;
 }
 
+// Verifies that a string contains vaild hex or decimal digits
 bool isconstant(string& str) {
     if (str.empty())
         return false;
@@ -53,14 +60,18 @@ bool isconstant(string& str) {
     	: isdecimal(str, 0, str.length());
 }
 
+
+// Converts a string constant to an integer
 int ctoi(string& str) {
     return (str[0] == '$') ? hextoi(str.substr(1)): atoi(str.c_str());
 }
 
+// Verifies that a literal is quoted
 bool isquoted(string& str) {
     return ((str[1] == '\'') && (str[str.length()-1] == '\'')) ? true : false;
 }
 
+// Verifies that a string is a valid literal string
 bool isliteral(string& str) {
     if (str.empty() || str.length() < 3)
         return false;
@@ -72,22 +83,26 @@ bool isliteral(string& str) {
     return false;
 }
 
+// Returns the size for a quoted literal
 unsigned int size_for_literal(string& str) {
     return ((str[0] == 'c') || (str[0] == 'C')) ? (unsigned int)str.length()-3
     	: (unsigned int)(str.length()-3)>>1;
 }
 
+// Converts an integer to a string
 string itos(int integer) {
     stringstream itoss;
     itoss << integer;
     return itoss.str();
 }
 
+// Searches for the start directive
 bool is_start( string opcode ){
     transform(opcode.begin(), opcode.end(), opcode.begin(), ::toupper);
     return ( opcode.compare("START") == 0 ? true : false );
 }
 
+// Searches for the end directive
 bool is_end( string opcode ){
     transform(opcode.begin(), opcode.end(), opcode.begin(), ::toupper);
     return ( opcode.compare("END") == 0 ? true : false );
@@ -187,7 +202,6 @@ void sicxe_asm::get_tokens() {
     label = parser->get_token(index, 0);
     opcode = parser->get_token(index, 1);
     operand = parser->get_token(index, 2);
-    comment = parser->get_token(index, 3);
 }
 
 void sicxe_asm::listing_head(string filename) {

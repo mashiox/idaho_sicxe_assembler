@@ -28,7 +28,6 @@ class sicxe_asm {
     string label;
     string opcode;
     string operand;
-    string comment;
     ofstream listing;
     
     struct dhpair {
@@ -38,12 +37,17 @@ class sicxe_asm {
     
     static const struct dhpair dhpairs[9];
     
+    // Retrives the line tokens from the file parser
     void get_tokens();
+    // Setups the listing file with the program name and column headers
     void listing_head(string filename);
+    // Writes a line to the listing file
     void listing_lnout();
-    
+    // Creates the map for looking up handlers for instructions and directives
     void setup_handler_map();
+    // Retreives the symbol handler for the symbol
     sym_handler handler_for_symbol();
+    // Symbol handelers for instructions and directives
     void handle_instruction();
     void handle_start();
     void handle_byte_word();
@@ -52,16 +56,20 @@ class sicxe_asm {
     void handle_equ();
     void handle_directive();
     void handle_empty();
-    
+    // Adds the label address to the symbol table if it has one
     void add_symbol_for_label();
-    
+    // Throws an error string
     void error_str(string msg);
+    // Throws an error string also printing the line contents
     void error_ln_str(string msg);
     
 public:
+    // Sets up the handler map and listing file
     sicxe_asm(string file);
     ~sicxe_asm();
     
+    // Assigns addresses to each line, adds labels and directives to the symbol
+    // table
     void pass1();
     
 };
