@@ -338,6 +338,25 @@ void sicxe_asm::add_symbol_for_label() {
     }
 }
 
+int sicxe_asm::getDisplacement( int addr1, int addr2 ){
+    int disp = addr1 - addr2;
+    
+    if ( disp >= -2048 && disp <= 2047 ){
+        nixbpe[3] = 0;
+        nixbpe[4] = 1;
+        return disp;
+    }
+    
+    if ( disp >= 0 && disp <= 4095 ){
+        nixbpe[3] = 1;
+        nixbpe[4] = 0;
+        return disp;
+    }
+    
+    error_ln_str("Addressing displacement out of bounds, use format 4");
+    
+}
+
 int main(int argc, char* argv[]) {
     if (argc != 2) {
         cout << "Proper usage is " << argv[0] << " filename. " << endl;

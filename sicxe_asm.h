@@ -59,6 +59,8 @@ class sicxe_asm {
     void error_str(string msg);
     void error_ln_str(string msg);
     
+    int getDisplacement( int, int );
+    
 public:
     sicxe_asm(string file);
     ~sicxe_asm();
