@@ -375,11 +375,15 @@ string sicxe_asm::get_reg_val(string r){ // Return register number
 	else   return "";
 }
 
-string sicxe_asm::str_toint_tohex_tostr(string r){ // turns string into int,then converts int into hex, then converts back to string
+int sicxe_asm::str_toint(string r){ // turns string into int
 	int tempint; 
 	istringstream(r) >> tempint;
+	return tempint;
+}	
+	
+string sicxe_asm::int_tohex_tostr(int r){ //converts int into hex, then into string
 	stringstream tempstr;
-	tempstr << hex << tempint;
+	tempstr << hex << r;
 	return tempstr.str();
 }
 
@@ -418,12 +422,15 @@ string sicxe_asm::format_2(string opc, string oper) { // Format 2 Machine code
 			error_str("Opcode " + opc + " has incorrect argument");
 		}
 		else { 
-			string tempR2 = str_toint_tohex_tostr(r2); 
+			int tempint = str_toint(r2);
+			tempint--;
+			string tempR2 = int_tohex_tostr(tempint); 
 			machine_code = op_machine_code + r1_value + tempR2;
 		}
 	}  
 	else if ( opc == "svc") { 
-		string tempR1 = str_toint_tohex_tostr(r1);
+		int tempint = str_toint(r1);
+		string tempR1 = int_tohex_tostr(tempint);
 		machine_code = op_machine_code + tempR1 + "0";
 	}	
 	else	{
@@ -438,6 +445,7 @@ string sicxe_asm::format_2(string opc, string oper) { // Format 2 Machine code
 	}
 	return machine_code;
 }
+
 
 
 
