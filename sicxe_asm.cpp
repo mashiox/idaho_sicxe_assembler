@@ -435,28 +435,32 @@ void sicxe_asm::add_symbol_for_label() {
 void sicxe_asm::format3(){
    string tempOperand = operand;
    int addressCode;
+   bool isX;
    nixbpe = 0;
    try {
       //Checks whether it has a symbol infront and changes the flags accordingly
       if(tempOperand[0] == '@'){
-         nixbpe = 0x20;
+         nixbpe |= 0x20;
+         isX = false;
          tempOperand = tempOperand.substr(1,tempOperand.size()-1);
       }
       else if(tempOperand[0] == '#'){
-         nixbpe = 0x10;
+         nixbpe |= 0x10;
+         isX = false;
          tempOperand = tempOperand.substr(1,tempOperand.size()-1);
       }
       else{
-         nixbpe = 0x20;
-         nixbpe = 0x10;
+         nixbpe |= 0x20;
+         nixbpe |= 0x10;
+         isX = true;
       }
       //Checks if the operand has a X register then changes flags accordingly
       //If there is something else after the ',' then it throws an error
       if(tempOperand.find(',') != -1){
          string registerX = tempOperand.substr(tempOperand.find(','),tempOperand.size()-1);
          string rand1 = tempOperand.substr(0, tempOperand.find(','));
-         if(registerX == "X" || registerX == "x"){
-            nixbpe = 0x8;
+         if(registerX == "X" || registerX == "x" && isX){
+            nixbpe |= 0x8;
          }else if(!registerX.empty()){
             throw;
          }
@@ -484,29 +488,33 @@ void sicxe_asm::format4(){
    string tempOpcode = opcode.substr(1,opcode.size()-1);
    string tempOperand = operand;
    int addressCode;
+   bool isX;
    nixbpe = 0;
    try {
-      nixbpe = 0x1;
+      nixbpe |= 0x1;
       if(tempOperand[0] == '@'){
          if(!isalpha(tempOperand[1])){
             throw;
          }
-         nixbpe = 0x20;
+         nixbpe |= 0x20;
+         isX = false;
          tempOperand = tempOperand.substr(1,tempOperand.size()-1);
       }
       else if(tempOperand[0] == '#'){
-         nixbpe = 0x10;
+         nixbpe |= 0x10;
+         isX = false;
          tempOperand = tempOperand.substr(1,tempOperand.size()-1);
       }
       else{
-         nixbpe = 0x20;
-         nixbpe = 0x10;
+         nixbpe |= 0x20;
+         nixbpe |= 0x10;
+         isX = true;
       }
       if(tempOperand.find(',') != -1){
          string registerX = tempOperand.substr(tempOperand.find(','),tempOperand.size()-1);
          string rand1 = tempOperand.substr(0, tempOperand.find(','));
-         if(registerX == "X" || registerX == "x"){
-            nixbpe = 0x8;
+         if(registerX == "X" || registerX == "x" && isX){
+            nixbpe |= 0x8;
          } else if(!registerX.empty()){
          throw;
          }
