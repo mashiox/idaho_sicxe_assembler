@@ -361,11 +361,11 @@ void sicxe_asm::format3(){
       //Checks whether it has a symbol infront and changes the flags accordingly
       if(tempOperand[0] == '@'){
          nixbpe = 0x20;
-         tempOperand = tempOperand.subtr(1,tempOperand.size()-1);
+         tempOperand = tempOperand.substr(1,tempOperand.size()-1);
       }
       else if(tempOperand[0] == '#'){
          nixbpe = 0x10;
-         tempOperand = tempOperand.subtr(1,tempOperand.size()-1);
+         tempOperand = tempOperand.substr(1,tempOperand.size()-1);
       }
       else{
          nixbpe = 0x20;
@@ -378,9 +378,9 @@ void sicxe_asm::format3(){
          string rand1 = tempOperand.substr(0, tempOperand.find(','));
          if(registerX == "X" || registerX == "x"){
             nixbpe = 0x8;
-         }
-      }else if(!registerX.empty()){
+         }else if(!registerX.empty()){
             throw;
+         }
       }
       struct sicxe_asm::symbol sym;
       //gets address portion and checks if its a constant or an address.   
@@ -390,9 +390,9 @@ void sicxe_asm::format3(){
          addressCode = getDisplacement(sym.value,line_addrs.at(index) + 3);
       }
       
-      int intruction = 0;
+      int instruction = 0;
       instruction = hextoi(optab.get_machine_code(opcode)) << 18;
-      instruction |= nixpbe << 12;
+      instruction |= nixbpe << 12;
       instruction |= addressCode;
       objCode = itos(instruction, 6);
    }
@@ -402,7 +402,7 @@ void sicxe_asm::format3(){
 }
 
 void sicxe_asm::format4(){
-   string tempOpcode = substr(1,opcode.size()-1);
+   string tempOpcode = opcode.substr(1,opcode.size()-1);
    string tempOperand = operand;
    int addressCode;
    nixbpe = 0;
@@ -413,11 +413,11 @@ void sicxe_asm::format4(){
             throw;
          }
          nixbpe = 0x20;
-         tempOperand = tempOperand.subtr(1,tempOperand.size()-1);
+         tempOperand = tempOperand.substr(1,tempOperand.size()-1);
       }
       else if(tempOperand[0] == '#'){
          nixbpe = 0x10;
-         tempOperand = tempOperand.subtr(1,tempOperand.size()-1);
+         tempOperand = tempOperand.substr(1,tempOperand.size()-1);
       }
       else{
          nixbpe = 0x20;
@@ -428,9 +428,9 @@ void sicxe_asm::format4(){
          string rand1 = tempOperand.substr(0, tempOperand.find(','));
          if(registerX == "X" || registerX == "x"){
             nixbpe = 0x8;
-         }
-      }else if(!registerX.empty()){
+         } else if(!registerX.empty()){
          throw;
+         }
       }
       
       struct sicxe_asm::symbol sym;
