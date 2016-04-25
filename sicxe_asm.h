@@ -33,6 +33,12 @@ class sicxe_asm {
     ofstream listing;
     int nixbpe[6];
     
+   string format_1(string);
+   string format_2(string, string);
+   string get_reg_val(string);
+   string str_toint_tohex_tostr(string);
+
+    
     struct dhpair {
         string directive;
         sym_handler handler;
