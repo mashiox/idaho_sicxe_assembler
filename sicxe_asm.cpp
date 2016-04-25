@@ -12,6 +12,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <ctype.h>
 #include "sicxe_asm.h"
 #include "file_parse_exception.h"
 #include "opcode_error_exception.h"
@@ -85,15 +86,9 @@ bool sicxe_asm::isconstant(string& str) {
     	: isdecimal(str, 0, str.length());
 }
 
-<<<<<<< HEAD
-int ctoi(string& str) {
-    return (str[0] == '$') ? hextoi(str.substr(1)) : hextoi(str);
-=======
-
 // Converts a string constant to an integer
 int sicxe_asm::ctoi(string& str) {
     return (str[0] == '$') ? hextoi(str.substr(1)): atoi(str.c_str());
->>>>>>> 1a272b80a9a42268d67a243eabf786dc22185c0e
 }
 
 // Verifies that a literal is quoted
@@ -436,6 +431,104 @@ void sicxe_asm::add_symbol_for_label() {
         }
     }
 }
+//returns objCode for format 3
+void sicxe_asm::format3(){
+   string tempOperand = operand;
+   int addressCode;
+   nixbpe = 0;
+   try {
+      //Checks whether it has a symbol infront and changes the flags accordingly
+      if(tempOperand[0] == '@'){
+         nixbpe = 0x20;
+         tempOperand = tempOperand.substr(1,tempOperand.size()-1);
+      }
+      else if(tempOperand[0] == '#'){
+         nixbpe = 0x10;
+         tempOperand = tempOperand.substr(1,tempOperand.size()-1);
+      }
+      else{
+         nixbpe = 0x20;
+         nixbpe = 0x10;
+      }
+      //Checks if the operand has a X register then changes flags accordingly
+      //If there is something else after the ',' then it throws an error
+      if(tempOperand.find(',') != -1){
+         string registerX = tempOperand.substr(tempOperand.find(','),tempOperand.size()-1);
+         string rand1 = tempOperand.substr(0, tempOperand.find(','));
+         if(registerX == "X" || registerX == "x"){
+            nixbpe = 0x8;
+         }else if(!registerX.empty()){
+            throw;
+         }
+      }
+      struct sicxe_asm::symbol sym;
+      //gets address portion and checks if its a constant or an address.   
+      if(!sym.isaddress){
+         addressCode = sym.value;
+      }else{
+         addressCode = getDisplacement(sym.value,line_addrs.at(index) + 3);
+      }
+      
+      int instruction = 0;
+      instruction = hextoi(optab.get_machine_code(opcode)) << 18;
+      instruction |= nixbpe << 12;
+      instruction |= addressCode;
+      objCode = itos(instruction, 6);
+   }
+   catch (opcode_error_exception e) {
+      error_ln_str(e.getMessage());
+   }
+}
+
+void sicxe_asm::format4(){
+   string tempOpcode = opcode.substr(1,opcode.size()-1);
+   string tempOperand = operand;
+   int addressCode;
+   nixbpe = 0;
+   try {
+      nixbpe = 0x1;
+      if(tempOperand[0] == '@'){
+         if(!isalpha(tempOperand[1])){
+            throw;
+         }
+         nixbpe = 0x20;
+         tempOperand = tempOperand.substr(1,tempOperand.size()-1);
+      }
+      else if(tempOperand[0] == '#'){
+         nixbpe = 0x10;
+         tempOperand = tempOperand.substr(1,tempOperand.size()-1);
+      }
+      else{
+         nixbpe = 0x20;
+         nixbpe = 0x10;
+      }
+      if(tempOperand.find(',') != -1){
+         string registerX = tempOperand.substr(tempOperand.find(','),tempOperand.size()-1);
+         string rand1 = tempOperand.substr(0, tempOperand.find(','));
+         if(registerX == "X" || registerX == "x"){
+            nixbpe = 0x8;
+         } else if(!registerX.empty()){
+         throw;
+         }
+      }
+      
+      struct sicxe_asm::symbol sym;
+      
+      if(!sym.isaddress){
+         addressCode = sym.value;
+      }else{
+         addressCode = getDisplacement(sym.value, line_addrs.at(index) + 4);
+      }
+      int intruction = 0;
+      instruction = hextoi(optab.get_machine_code(TempOpcode)) << 26;
+      instruction |= nixpbe << 20;
+      instruction |= addressCode;
+      objCode = itos(instruction, 8);
+   }
+   catch (opcode_error_exception e) {
+      error_ln_str(e.getMessage());
+   }
+}
 
 string sicxe_asm::get_reg_val(string r){ // Return register number
     int i = 0;
@@ -565,6 +658,114 @@ void sicxe_asm::set_nobase() {
 void sicxe_asm::empty_objcode() {
     objCode.clear();
 }
+
+int sicxe_asm::getDisplacement( int addr1, int addr2 ){
+    int disp = addr1 - addr2;
+    int baseDisp = addr1 - base_addr;
+    
+    if ( disp >= -2048 && disp <= 2047 ){
+        nixbpe = 0x2;
+        return disp;
+    } else if (!noBase && baseDisp >= 0 && baseDisp <= 4095){
+        nixbpe = 0x4;
+        return baseDisp;
+    }else {
+       error_ln_str("Addressing displacement out of bounds, use format 4");
+    }
+}
+// Pass 2 Format 1 & 2
+string sicxe_asm::get_reg_val(string r){ // Return register number
+	int i = 0;
+	while(r[i])	{
+        	r[i] = toupper(r[i]);
+        	i++;
+	}
+	if ( r == "A" ) return "0";
+	else if ( r == "X" )  return "1";
+	else if ( r == "L" )  return "2";
+	else if ( r == "B" )  return "3";
+	else if ( r == "S" )  return "4";
+	else if ( r == "T" )  return "5";
+	else if ( r == "F" )  return "6";
+	else if ( r == "PC" ) return "8";
+	else if ( r == "SW" ) return "9";
+	else   return "";
+}
+
+int sicxe_asm::str_toint(string r){ // turns string into int
+	int tempint; 
+	istringstream(r) >> tempint;
+	return tempint;
+}	
+	
+string sicxe_asm::int_tohex_tostr(int r){ //converts int into hex, then into string
+	stringstream tempstr;
+	tempstr << hex << r;
+	return tempstr.str();
+}
+
+string sicxe_asm::format_1(string opc) { // Format 1 machine code
+	return  optab.get_machine_code(opc);
+}
+
+string sicxe_asm::format_2(string opc, string oper) { // Format 2 Machine code
+	
+	string op_machine_code = optab.get_machine_code(opc);
+	string machine_code, r1, r2 = "";
+	stringstream str(oper);
+	getline(str, r1, ',');
+	getline(str, r2);
+	string r1_value = get_reg_val(r1); 
+	string r2_value = get_reg_val(r2);
+
+	int i = 0;
+	while(opc[i])	{ 
+        	opc[i] = tolower(opc[i]);
+        	i++;
+	}
+
+	if(r1 == ""){ // register 1 must exist or else error
+		error_str("Opcode " + opc + " has incorrect argument");
+	}
+	
+	if(opc == "clear" || opc == "tixr") {
+	   	if(r1_value == "")   { // register 1 must have a value
+		      error_str("Opcode " + opc + " has incorrect argument");
+	      }
+		machine_code = op_machine_code + r1_value + "0";
+	} 
+	else if (opc == "shiftl" || opc == "shiftr") {
+		if(r2 == "" || r1_value == ""){
+			error_str("Opcode " + opc + " has incorrect argument");
+		}
+		else { 
+			int tempint = str_toint(r2);
+			tempint--;
+			string tempR2 = int_tohex_tostr(tempint); 
+			machine_code = op_machine_code + r1_value + tempR2;
+		}
+	}  
+	else if ( opc == "svc") { 
+		int tempint = str_toint(r1);
+		string tempR1 = int_tohex_tostr(tempint);
+		machine_code = op_machine_code + tempR1 + "0";
+	}	
+	else	{
+		if(r2_value == "" || r1_value == "") { //register value nust exist
+			error_str("Opcode " + opc + " has incorrect argument");
+		}	
+		else
+			machine_code = op_machine_code + r1_value + r2_value;
+	}
+	if (machine_code == "")	{
+		error_str("Opcode " + opc + " does not exist"); 
+	}
+	return machine_code;
+}
+
+
+
+
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {

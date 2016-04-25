@@ -47,8 +47,28 @@ class sicxe_asm {
     string label;
     string opcode;
     string operand;
+<<<<<<< HEAD
     string objCode;
     stringstream listing;
+=======
+    ofstream listing;
+    int nixbpe;
+    
+   string format_1(string);
+   string format_2(string, string);
+   string get_reg_val(string);
+   int str_toint(string);
+   string int_tohex_tostr(int);
+
+
+    
+    struct dhpair {
+        string directive;
+        sym_handler handler;
+    };
+    
+    static const struct dhpair dhpairs[9];
+>>>>>>> 14ce097d950495ea044a4bcb6b64682b1e6d23b4
     
     // Retrives the line tokens from the file parser
     void get_tokens();
@@ -102,6 +122,11 @@ class sicxe_asm {
     string get_reg_val(string);
     int str_toint(string);
     string int_tohex_tostr(int);
+    void format3();
+    
+    void format4();
+    
+    int getDisplacement( int, int );
     
 public:
     // Sets up the handler map and listing file
