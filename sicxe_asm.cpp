@@ -353,73 +353,74 @@ void sicxe_asm::add_symbol_for_label() {
     }
 }
 
-int sicxe_asm::format3(string opcode, string operand){
- int addressCode;
-   memset(nixbpe, 0, sizeof(nixbpe));
+void sicxe_asm::format3(){
+   string tempOperand = operand;
+   int addressCode;
+   nixbpe = 0;
    try {
-      nixbpe[5] = 1;
-      if(operand[0] == '@'){
-         nixbpe[0] = 1;
-         operand = operand.subtr(1,operand.size()-1);
+      if(tempOperand[0] == '@'){
+         nixbpe = 0x20;
+         tempOperand = tempOperand.subtr(1,tempOperand.size()-1);
       }
-      else if(operand[0] == '#'){
-         nixbpe[1] = 1;
-         operand = operand.subtr(1,operand.size()-1);
+      else if(tempOperand[0] == '#'){
+         nixbpe = 0x10;
+         tempOperand = tempOperand.subtr(1,tempOperand.size()-1);
       }
       else{
-         nixbpe[0] = 1;
-         nixbpe[1] = 1;
+         nixbpe = 0x20;
+         nixbpe = 0x10;
       }
-      if(operand.find(',') != -1){
-         string registerX = operand.substr(operand.find(','),operand.size()-1);
-         string rand1 = operand.substr(0, operand.find(','));
+      if(tempOperand.find(',') != -1){
+         string registerX = tempOperand.substr(tempOperand.find(','),tempOperand.size()-1);
+         string rand1 = tempOperand.substr(0, tempOperand.find(','));
          if(registerX == "X" || registerX == "x"){
-            nixbpe[2] = 1;
-            //addressCode = getDisplacement(rand1.address?,address of line + 3);
+            nixbpe = 0x8;
+          //  addressCode = getDisplacement(rand1.address?,address of line + 3);
          }
          else if(!registerX.empty()){
             throw;
          }
       } else {
-            //addressCode = getDisplacement(operand.address?,address of line + 3);
+           // addressCode = getDisplacement(operand.address?,address of line + 3);
          }
    int intruction = 0;
-   //instruction = opcode.code << 18;
-   //convert nixpbe
-   //instruction |= nixpbe << 12;
-   //instruction |= addressCode;
+   instruction = hextoi(optab.get_machine_code(opcode)) << 18;
+   instruction |= nixpbe << 12;
+   instruction |= addressCode;
    }
    catch (opcode_error_exception e) {
       error_ln_str(e.getMessage());
    }
-   return instruction;
+   objCode = itos(instruction, 6);
 }
 
-int sicxe_asm::format4(string opcode, string operand){
+void sicxe_asm::format4(){
+   string tempOpcode = substr(1,opcode.size()-1);
+   string tempOperand = operand;
    int addressCode;
-   memset(nixbpe, 0, sizeof(nixbpe));
+   nixbpe = 0;
    try {
-      nixbpe[5] = 1;
-      if(operand[0] == '@'){
-         if(!isalpha(operand[1])){
+      nixbpe = 0x1;
+      if(tempOperand[0] == '@'){
+         if(!isalpha(tempOperand[1])){
             throw;
          }
-         nixbpe[0] = 1;
-         operand = operand.subtr(1,operand.size()-1);
+         nixbpe = 0x20;
+         tempOperand = tempOperand.subtr(1,tempOperand.size()-1);
       }
-      else if(operand[0] == '#'){
-         nixbpe[1] = 1;
-         operand = operand.subtr(1,operand.size()-1);
+      else if(tempOperand[0] == '#'){
+         nixbpe = 0x10;
+         tempOperand = tempOperand.subtr(1,tempOperand.size()-1);
       }
       else{
-         nixbpe[0] = 1;
-         nixbpe[1] = 1;
+         nixbpe = 0x20;
+         nixbpe = 0x10;
       }
-      if(operand.find(',') != -1){
-         string registerX = operand.substr(operand.find(','),operand.size()-1);
-         string rand1 = operand.substr(0, operand.find(','));
+      if(tempOperand.find(',') != -1){
+         string registerX = tempOperand.substr(tempOperand.find(','),tempOperand.size()-1);
+         string rand1 = tempOperand.substr(0, tempOperand.find(','));
          if(registerX == "X" || registerX == "x"){
-            nixbpe[2] = 1;
+            nixbpe = 0x8;
             //addressCode = rand1.address?
          }
          else if(!registerX.empty()){
@@ -429,34 +430,29 @@ int sicxe_asm::format4(string opcode, string operand){
             //addressCode = operand.address?
          }
    int intruction = 0;
-   //instruction = opcode.code << 26;
-   //convert nixpbe
-   //instruction |= nixpbe << 20;
-   //instruction |= addressCode;
+   instruction = hextoi(optab.get_machine_code(TempOpcode)) << 26;
+   instruction |= nixpbe << 20;
+   instruction |= addressCode;
    }
    catch (opcode_error_exception e) {
       error_ln_str(e.getMessage());
    }
-   return instruction;
+   objCode = itos(instruction, 8);
 }
 
 int sicxe_asm::getDisplacement( int addr1, int addr2 ){
     int disp = addr1 - addr2;
+    int baseDisp = addr1 - base_addr;
     
     if ( disp >= -2048 && disp <= 2047 ){
-        nixbpe[3] = 0;
-        nixbpe[4] = 1;
+        nixbpe = 0x2;
         return disp;
+    } else if (!noBase && baseDisp >= 0 && baseDisp <= 4095){
+        nixbpe = 0x4;
+        return baseDisp;
+    }else {
+       error_ln_str("Addressing displacement out of bounds, use format 4");
     }
-    
-    if ( disp >= 0 && disp <= 4095 ){
-        nixbpe[3] = 1;
-        nixbpe[4] = 0;
-        return disp;
-    }
-    
-    error_ln_str("Addressing displacement out of bounds, use format 4");
-    
 }
 
 int main(int argc, char* argv[]) {
