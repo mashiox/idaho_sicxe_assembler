@@ -30,7 +30,7 @@ class sicxe_asm {
     string opcode;
     string operand;
     ofstream listing;
-    int nixbpe[6];
+    int nixbpe;
     
     struct dhpair {
         string directive;
