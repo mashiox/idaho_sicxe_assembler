@@ -1,15 +1,31 @@
 /* Shad Aziz, Phillip Domann, Melanie Reed, Matt Walther
- mascxxxx
- Team Idaho
- prog3
- CS530, Spring 2016
- */
+   masc0832
+   Team Idaho
+   prog3
+   CS530, Spring 2016
+*/
 
-#ifndef SYMTAB_H
-#define SYMTAB_H
+#include <iostream>
+#include <map>
+#include <string>
+#include <iomanip>
+#include <sstream>
 
-class symtab {
-    
-};
+#ifndef SYMTAB_H_
+#define SYMTAB_H_
 
-#endif
+using namespace std;
+
+ class symtab {
+ public:
+      	symtab();
+  	void add(string, string);
+ 	string get(string);
+ 	bool exists(string);
+
+ private:
+      	map<string, string> symbol_table;
+	map<string, string>::iterator symbol_iter;
+ };
+
+ #endif
