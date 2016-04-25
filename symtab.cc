@@ -16,6 +16,7 @@ using namespace std;
 symtab::symtab(){}
 
 void symtab::add(string label, string value){
+    transform(label.begin(), label.end(), label.begin(), ::toupper);
 	symbol_iter = symbol_table.find(label);
 	if( symbol_iter != symbol_table.end() ) {
 		throw symtab_exception("Symbol " + label + " already declared");
@@ -24,6 +25,7 @@ void symtab::add(string label, string value){
 }
 
 string symtab::get(string label){
+    transform(label.begin(), label.end(), label.begin(), ::toupper);
 	symbol_iter = symbol_table.find(label);
 	if( symbol_iter == symbol_table.end() ) {
 		throw symtab_exception("Label " + label + " does not exist");
@@ -32,8 +34,17 @@ string symtab::get(string label){
 }
 	
 bool symtab::exists(string label){
+    transform(label.begin(), label.end(), label.begin(), ::toupper);
 	if ( symbol_table.find(label) == symbol_table.end() )
 		return false;
 	else
 		return true;
+}
+
+// remove before submission
+void symtab::print() {
+    map<string, string>::iterator it;
+    for (it = symbol_table.begin(); it != symbol_table.end(); ++it) {
+        cout << it->first << " " << it->second << endl;
+    }
 }

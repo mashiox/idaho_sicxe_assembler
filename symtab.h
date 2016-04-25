@@ -22,6 +22,7 @@ using namespace std;
   	void add(string, string);
  	string get(string);
  	bool exists(string);
+     void print(); //remove before submission
 
  private:
       	map<string, string> symbol_table;

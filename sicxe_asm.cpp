@@ -18,7 +18,6 @@
 
 using namespace std;
 
-
 // Converts a hex string to an integer value
 int hextoi(string str) {
     int integer;
@@ -27,7 +26,6 @@ int hextoi(string str) {
     ss >> integer;
     return integer;
 }
-
 
 // Checks that a string range contains only digits
 bool isdecimal(string& str, size_t start, size_t end) {
@@ -109,29 +107,25 @@ bool is_end( string opcode ){
 }
 
 const struct sicxe_asm::dhpair sicxe_asm::dhpairs[9] = {
-    {"START", &sicxe_asm::handle_start},
-    {"END", &sicxe_asm::handle_directive},
-    {"BYTE", &sicxe_asm::handle_byte_word},
-    {"WORD", &sicxe_asm::handle_byte_word},
-    {"RESB", &sicxe_asm::handle_resb},
-    {"RESW", &sicxe_asm::handle_resw},
-    {"BASE", &sicxe_asm::handle_directive},
-    {"NOBASE", &sicxe_asm::handle_directive},
-    {"EQU", &sicxe_asm::handle_equ}
+    {"START", {&sicxe_asm::handle_start, &sicxe_asm::empty_objcode}},
+    {"END", {&sicxe_asm::handle_end, &sicxe_asm::empty_objcode}},
+    {"BYTE", {&sicxe_asm::handle_byte, &sicxe_asm::byte_objcode}},
+    {"WORD", {&sicxe_asm::handle_word, &sicxe_asm::word_objcode}},
+    {"RESB", {&sicxe_asm::handle_resb, &sicxe_asm::empty_objcode}},
+    {"RESW", {&sicxe_asm::handle_resw, &sicxe_asm::empty_objcode}},
+    {"BASE", {&sicxe_asm::handle_base, &sicxe_asm::set_base_address}},
+    {"NOBASE", {&sicxe_asm::handle_nobase, &sicxe_asm::set_nobase}},
+    {"EQU", {&sicxe_asm::handle_equ, &sicxe_asm::empty_objcode}}
 };
 
 sicxe_asm::sicxe_asm(string file) {
     parser = new file_parser(file);
     locctr = 0;
     setup_handler_map();
-    string listingFile = file.substr(0, file.rfind("."));
-    listingFile = listingFile + ".lis";
-    listing.open(listingFile.c_str());
     listing_head(file);
 }
 
 sicxe_asm::~sicxe_asm() {
-    listing.close();
     delete parser;
 }
 
@@ -157,12 +151,11 @@ void sicxe_asm::pass1() {
         get_tokens();
         if (is_start(opcode)) {
             handle_start();
-            listing_lnout();
+            line_addrs.push_back(locctr);
             break;
         } else if (!opcode.empty()) {
             error_ln_str("There must be no operations before start directive.");
         } else {
-            listing_lnout();
             line_addrs.push_back(locctr);
         }
     }
@@ -174,13 +167,13 @@ void sicxe_asm::pass1() {
     for (++index; index < nlines; ++index) {
         line_addrs.push_back(locctr);
         get_tokens();
-        listing_lnout();
         if (is_end(opcode)) {
-            handle_directive();
+            handle_end();
+            line_addrs.push_back(locctr);
             break;
         }
         else {
-            handle_symbol = handler_for_symbol();
+            handle_symbol = handler_for_symbol(1);
             (this->*handle_symbol)();
         }
     }
@@ -191,11 +184,39 @@ void sicxe_asm::pass1() {
     for (++index; index < nlines; ++index) {
         line_addrs.push_back(locctr);
         get_tokens();
-        listing_lnout();
         if (!opcode.empty()) {
             error_ln_str("Additional operations cannot exist after end directive.");
         }
     }
+    line_addrs.push_back(locctr);
+    
+}
+
+void sicxe_asm::pass2() {
+    symbols.print(); // remove before submission
+    noBase = true;
+    unsigned int nlines = (unsigned int)parser->size();
+
+    for (index = 0; index < nlines; ++index) {
+        get_tokens();
+        sym_handler handle_symbol =  handler_for_symbol(0);
+        (this->*handle_symbol)();
+        listing_lnout();
+    }
+}
+
+void sicxe_asm::write_listing(string file) {
+    ofstream listingStream;
+    string listingFile = file.substr(0, file.rfind("."));
+    listingFile = listingFile + ".lis";
+    listingStream.open(listingFile.c_str());
+    listingStream << listing.str();
+    listingStream.close();
+}
+
+// remove before submission
+void sicxe_asm::print_listing() {
+    cout << listing.str();
 }
 
 void sicxe_asm::get_tokens() {
@@ -207,23 +228,25 @@ void sicxe_asm::get_tokens() {
 void sicxe_asm::listing_head(string filename) {
     int width = 38-(int)(filename.length()>>1);
     listing << setw(width) << "**" << filename << "**" << "\n\n";
-    listing << setw(5) << "Line#";
+    listing << left << setw(5) << "Line#";
     listing << setw(8) << " Address";
-    listing << left << setw(16) << " Label";
-    listing << setw(16) << "Opcode";
-    listing << setw(36) << "Operand";
+    listing << setw(9) << " Label";
+    listing << setw(16) << " Opcode";
+    listing << setw(28) << " Operand";
+    listing << setw(12) << " Machine Code";
     listing << endl;
-    listing << setw(5) << "=====" << setw(8) << " =======" << setw(16);
-    listing << " =====" << setw(16) << "======" << setw(36) << "=======";
-    listing << endl;
+    listing << setw(5) << "=====" << setw(8) << " =======" << setw(9);
+    listing << " =====" << setw(16) << " ======" << setw(28) << " =======";
+    listing << setw(12) << " ============" << endl;
 }
 
 void sicxe_asm::listing_lnout() {
     listing << right << setw(5) << dec << index+1;
-    listing << "   " << setw(5) << hex << uppercase << setfill('0') << locctr;
-    listing << " " << left << setw(15) << setfill(' ') << label;
-    listing << setw(16) << opcode;
-    listing << setw(36) << operand;
+    listing << "   " << setw(5) << hex << uppercase << setfill('0') << line_addrs.at(index);
+    listing << " " << left << setw(8) << setfill(' ') << label;
+    listing << " " << setw(15) << opcode;
+    listing << " " << setw(27) << operand;
+    listing << " " << setw(11) << objCode;
     listing << endl;
 }
 
@@ -232,26 +255,41 @@ void sicxe_asm::setup_handler_map() {
     for (i = 0; i < sizeof(opcodetab::instrs)/sizeof(opcodetab::instr); ++i) {
         string instr = opcodetab::instrs[i].menmonic;
         transform(instr.begin(), instr.end(), instr.begin(), ::toupper);
-        hmap.insert(make_pair(instr, &sicxe_asm::handle_instruction));
+        struct hpair handlers;
+        handlers.pass1 = &sicxe_asm::handle_instruction;
+        short format = opcodetab::instrs[i].details.format;
+        switch (format) {
+            case 1:
+                handlers.pass2 = &sicxe_asm::format1_objcode;
+                break;
+            case 2:
+                handlers.pass2 = &sicxe_asm::format2_objcode;
+                break;
+            case 3:
+                handlers.pass2 = &sicxe_asm::format3_objcode;
+                break;
+        }
+        hmap.insert(make_pair(instr, handlers));
     }
     
     for (i = 0; i < sizeof(sicxe_asm::dhpairs)/sizeof(sicxe_asm::dhpair); ++i) {
         hmap.insert(make_pair(sicxe_asm::dhpairs[i].directive,
-        	sicxe_asm::dhpairs[i].handler));
+        	sicxe_asm::dhpairs[i].handlers));
     }
 }
 
-sicxe_asm::sym_handler sicxe_asm::handler_for_symbol() {
+sicxe_asm::sym_handler sicxe_asm::handler_for_symbol(bool pass) {
     if (opcode.empty()) {
-        return &sicxe_asm::handle_empty;
+        return (pass) ? &sicxe_asm::handle_empty : &sicxe_asm::empty_objcode;
     }
     string symbol = (opcode[0] == '+') ? opcode.substr(1, string::npos) : opcode;
     transform(symbol.begin(), symbol.end(), symbol.begin(), ::toupper);
-    map<string, sym_handler>::iterator iter = hmap.find(symbol);
+    map<string, struct sicxe_asm::hpair>::iterator iter = hmap.find(symbol);
     if (iter == hmap.end()) {
         error_ln_str("Invalid opcode.");
     }
-    return iter->second;
+    
+    return (pass) ? iter->second.pass1: iter->second.pass2;
 }
 
 void sicxe_asm::handle_instruction() {
@@ -269,22 +307,29 @@ void sicxe_asm::handle_start() {
         locctr = ctoi(operand);
     else
         error_ln_str("Invalid constant.");
-    
-    try {
-        symbols.add(opcode, label);
-    }
-    catch (symtab_exception e) {
-        error_ln_str(e.getMessage());
-    }
+    add_symbol_for_label();
 }
 
-void sicxe_asm::handle_byte_word() {
+void sicxe_asm::handle_end() {
+    if (operand.empty()) {
+        error_ln_str("End directive must have label or address.");
+    }
+    add_symbol_for_label();
+}
+
+void sicxe_asm::handle_byte() {
     if (isliteral(operand))
         locctr += size_for_literal(operand);
-    else if (isconstant(operand))
-        locctr += (opcode[0] == 'b' || opcode[0] == 'B') ? 1: 3;
     else
         error_ln_str("Invalid quoted literal.");
+    add_symbol_for_label();
+}
+
+void sicxe_asm::handle_word() {
+    if(isconstant(operand))
+        locctr += 3;
+    else
+        error_ln_str("Invalid constant");
     add_symbol_for_label();
 }
 
@@ -313,12 +358,15 @@ void sicxe_asm::handle_equ() {
     }
 }
 
-void sicxe_asm::handle_directive() {
-    try {
-        symbols.add(opcode, operand);
+void sicxe_asm::handle_base() {
+    if (operand.empty()) {
+        error_ln_str("Base directive requires label or address.");
     }
-    catch (symtab_exception e) {
-        error_ln_str(e.getMessage());
+}
+
+void sicxe_asm::handle_nobase() {
+    if (!operand.empty()) {
+        error_ln_str("Nobase directive does not use an operand");
     }
 }
 
@@ -337,9 +385,52 @@ void sicxe_asm::add_symbol_for_label() {
     }
 }
 
+void sicxe_asm::format1_objcode() {
+    objCode = optab.get_machine_code(opcode);
+}
+
+void sicxe_asm::format2_objcode() {
+    // objCode =
+}
+
+void sicxe_asm::format3_objcode() {
+    if (opcode[0] == '+') {
+        format4_objcode();
+        return;
+    }
+    // objCode =
+}
+
+void sicxe_asm::format4_objcode() {
+	// objCode =
+}
+
+void sicxe_asm::byte_objcode() {
+    // objCode =
+}
+
+void sicxe_asm::word_objcode() {
+    // objCode =
+}
+
+void sicxe_asm::set_base_address() {
+    objCode.clear();
+    noBase = false;
+    // get symbol from symtab
+}
+
+void sicxe_asm::set_nobase() {
+    objCode.clear();
+    noBase = true;
+}
+
+void sicxe_asm::empty_objcode() {
+    objCode.clear();
+}
+
 int main(int argc, char* argv[]) {
     if (argc != 2) {
-        cout << "Proper usage is " << argv[0] << " filename. " << endl;
+        cout << "Proper usage is " << argv[0] << " filename." << endl;
         return 1;
     }
     
@@ -347,6 +438,9 @@ int main(int argc, char* argv[]) {
     
     try {
     	assembler.pass1();
+        assembler.pass2();
+        assembler.print_listing(); // remove before submission
+        assembler.write_listing(string(argv[1]));
         return 0;
     }
     catch (file_parse_exception fpe) {
