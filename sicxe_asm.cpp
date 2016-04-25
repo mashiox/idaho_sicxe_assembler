@@ -356,6 +356,91 @@ int sicxe_asm::getDisplacement( int addr1, int addr2 ){
     error_ln_str("Addressing displacement out of bounds, use format 4");
     
 }
+// Pass 2 Format 1 & 2
+string sicxe_asm::get_reg_val(string r){ // Return register number
+	int i = 0;
+	while(r[i])	{
+        	r[i] = toupper(r[i]);
+        	i++;
+	}
+	if ( r == "A" ) return "0";
+	else if ( r == "X" )  return "1";
+	else if ( r == "L" )  return "2";
+	else if ( r == "B" )  return "3";
+	else if ( r == "S" )  return "4";
+	else if ( r == "T" )  return "5";
+	else if ( r == "F" )  return "6";
+	else if ( r == "PC" ) return "8";
+	else if ( r == "SW" ) return "9";
+	else   return "";
+}
+
+string sicxe_asm::str_toint_tohex_tostr(string r){ // turns string into int,then converts int into hex, then converts back to string
+	int tempint; 
+	istringstream(r) >> tempint;
+	stringstream tempstr;
+	tempstr << hex << tempint;
+	return tempstr.str();
+}
+
+string sicxe_asm::format_1(string opc) { // Format 1 machine code
+	return  optab.get_machine_code(opc);
+}
+
+string sicxe_asm::format_2(string opc, string oper) { // Format 2 Machine code
+	
+	string op_machine_code = optab.get_machine_code(opc);
+	string machine_code, r1, r2 = "";
+	stringstream str(oper);
+	getline(str, r1, ',');
+	getline(str, r2);
+	string r1_value = get_reg_val(r1); 
+	string r2_value = get_reg_val(r2);
+
+	int i = 0;
+	while(opc[i])	{ 
+        	opc[i] = tolower(opc[i]);
+        	i++;
+	}
+
+	if(r1 == ""){ // register 1 must exist or else error
+		error_str("Opcode " + opc + " has incorrect argument");
+	}
+	
+	if(opc == "clear" || opc == "tixr") {
+	   	if(r1_value == "")   { // register 1 must have a value
+		      error_str("Opcode " + opc + " has incorrect argument");
+	      }
+		machine_code = op_machine_code + r1_value + "0";
+	} 
+	else if (opc == "shiftl" || opc == "shiftr") {
+		if(r2 == "" || r1_value == ""){
+			error_str("Opcode " + opc + " has incorrect argument");
+		}
+		else { 
+			string tempR2 = str_toint_tohex_tostr(r2); 
+			machine_code = op_machine_code + r1_value + tempR2;
+		}
+	}  
+	else if ( opc == "svc") { 
+		string tempR1 = str_toint_tohex_tostr(r1);
+		machine_code = op_machine_code + tempR1 + "0";
+	}	
+	else	{
+		if(r2_value == "" || r1_value == "") { //register value nust exist
+			error_str("Opcode " + opc + " has incorrect argument");
+		}	
+		else
+			machine_code = op_machine_code + r1_value + r2_value;
+	}
+	if (machine_code == "")	{
+		error_str("Opcode " + opc + " does not exist"); 
+	}
+	return machine_code;
+}
+
+
+
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
