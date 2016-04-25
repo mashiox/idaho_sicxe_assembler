@@ -65,9 +65,9 @@ class sicxe_asm {
     // Throws an error string also printing the line contents
     void error_ln_str(string msg);
     
-    void format3(string opcode, string operand);
+    void format3();
     
-    void format4(string opcode, string operand);
+    void format4();
     
     int getDisplacement( int, int );
     
