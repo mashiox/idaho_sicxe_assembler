@@ -12,6 +12,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <ctype.h>
 #include "sicxe_asm.h"
 #include "file_parse_exception.h"
 #include "opcode_error_exception.h"
@@ -350,6 +351,93 @@ void sicxe_asm::add_symbol_for_label() {
             error_ln_str(e.getMessage());
         }
     }
+}
+
+int sicxe_asm::format3(string opcode, string operand){
+ int addressCode;
+   memset(nixbpe, 0, sizeof(nixbpe));
+   try {
+      nixbpe[5] = 1;
+      if(operand[0] == '@'){
+         nixbpe[0] = 1;
+         operand = operand.subtr(1,operand.size()-1);
+      }
+      else if(operand[0] == '#'){
+         nixbpe[1] = 1;
+         operand = operand.subtr(1,operand.size()-1);
+      }
+      else{
+         nixbpe[0] = 1;
+         nixbpe[1] = 1;
+      }
+      if(operand.find(',') != -1){
+         string registerX = operand.substr(operand.find(','),operand.size()-1);
+         string rand1 = operand.substr(0, operand.find(','));
+         if(registerX == "X" || registerX == "x"){
+            nixbpe[2] = 1;
+            //addressCode = getDisplacement(rand1.address?,address of line + 3);
+         }
+         else if(!registerX.empty()){
+            throw;
+         }
+      } else {
+            //addressCode = getDisplacement(operand.address?,address of line + 3);
+         }
+   int intruction = 0;
+   //instruction = opcode.code << 18;
+   //convert nixpbe
+   //instruction |= nixpbe << 12;
+   //instruction |= addressCode;
+   }
+   catch (opcode_error_exception e) {
+      error_ln_str(e.getMessage());
+   }
+   return instruction;
+}
+
+int sicxe_asm::format4(string opcode, string operand){
+   int addressCode;
+   memset(nixbpe, 0, sizeof(nixbpe));
+   try {
+      nixbpe[5] = 1;
+      if(operand[0] == '@'){
+         if(!isalpha(operand[1])){
+            throw;
+         }
+         nixbpe[0] = 1;
+         operand = operand.subtr(1,operand.size()-1);
+      }
+      else if(operand[0] == '#'){
+         nixbpe[1] = 1;
+         operand = operand.subtr(1,operand.size()-1);
+      }
+      else{
+         nixbpe[0] = 1;
+         nixbpe[1] = 1;
+      }
+      if(operand.find(',') != -1){
+         string registerX = operand.substr(operand.find(','),operand.size()-1);
+         string rand1 = operand.substr(0, operand.find(','));
+         if(registerX == "X" || registerX == "x"){
+            nixbpe[2] = 1;
+            //addressCode = rand1.address?
+         }
+         else if(!registerX.empty()){
+            throw;
+         }
+      } else {
+            //addressCode = operand.address?
+         }
+   int intruction = 0;
+   //instruction = opcode.code << 26;
+   //convert nixpbe
+   //instruction |= nixpbe << 20;
+   //instruction |= addressCode;
+   }
+   catch (opcode_error_exception e) {
+      error_ln_str(e.getMessage());
+   }
+   return instruction;
 }
 
 int sicxe_asm::getDisplacement( int addr1, int addr2 ){
