@@ -36,7 +36,9 @@ class sicxe_asm {
    string format_1(string);
    string format_2(string, string);
    string get_reg_val(string);
-   string str_toint_tohex_tostr(string);
+   int str_toint(string);
+   string int_tohex_tostr(int);
+
 
     
     struct dhpair {
