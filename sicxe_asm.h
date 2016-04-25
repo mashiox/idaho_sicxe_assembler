@@ -31,6 +31,7 @@ class sicxe_asm {
     string operand;
     string comment;
     ofstream listing;
+    int nixbpe[6];
     
     struct dhpair {
         string directive;
