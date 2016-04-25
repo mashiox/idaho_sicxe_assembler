@@ -15,7 +15,7 @@ using namespace std;
 
 symtab::symtab(){}
 
-void symtab::add(string label, string value){
+void symtab::add(string label, struct symbol value){
     transform(label.begin(), label.end(), label.begin(), ::toupper);
 	symbol_iter = symbol_table.find(label);
 	if( symbol_iter != symbol_table.end() ) {
@@ -24,7 +24,7 @@ void symtab::add(string label, string value){
     	symbol_table[label] = value; 
 }
 
-string symtab::get(string label){
+struct symtab::symbol symtab::get(string label){
     transform(label.begin(), label.end(), label.begin(), ::toupper);
 	symbol_iter = symbol_table.find(label);
 	if( symbol_iter == symbol_table.end() ) {
@@ -43,8 +43,8 @@ bool symtab::exists(string label){
 
 // remove before submission
 void symtab::print() {
-    map<string, string>::iterator it;
+    map<string, struct symbol>::iterator it;
     for (it = symbol_table.begin(); it != symbol_table.end(); ++it) {
-        cout << it->first << " " << it->second << endl;
+        cout << it->first << " " << it->second.value << " " << it->second.isaddress << endl;
     }
 }

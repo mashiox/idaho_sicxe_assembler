@@ -18,8 +18,34 @@
 
 using namespace std;
 
+struct sicxe_asm::symbol sicxe_asm::symtoval(string& symbol) {
+    if (islabel(symbol)) {
+        struct symtab::symbol sym;
+        sym = symbols.get(symbol);
+        
+        struct sicxe_asm::symbol rsym;
+        rsym.isaddress = sym.isaddress;
+        rsym.value = ctoi(sym.value);
+        return rsym;
+    }
+    struct sicxe_asm::symbol sym;
+    sym.isaddress = false;
+    sym.value = ctoi(symbol);
+    return sym;
+}
+
+bool sicxe_asm::islabel(string& islab){
+    if(!isalpha(islab[0]))
+        return false;
+    for(string::size_type i = 1; i<islab.length(); i++){
+        if(!isalnum(islab[i]))
+            return false;
+    }
+    return true;
+}
+
 // Converts a hex string to an integer value
-int hextoi(string str) {
+int sicxe_asm::hextoi(string str) {
     int integer;
     stringstream ss;
     ss << hex << str;
@@ -28,7 +54,7 @@ int hextoi(string str) {
 }
 
 // Checks that a string range contains only digits
-bool isdecimal(string& str, size_t start, size_t end) {
+bool sicxe_asm::isdecimal(string& str, size_t start, size_t end) {
     for (size_t i = start; i < end; ++i) {
         if (!isdigit(str[i])) {
             return false;
@@ -51,7 +77,7 @@ bool ishexadecimal(string& str, size_t start, size_t end) {
 }
 
 // Verifies that a string contains vaild hex or decimal digits
-bool isconstant(string& str) {
+bool sicxe_asm::isconstant(string& str) {
     if (str.empty())
         return false;
     return (str[0] == '$') ? ishexadecimal(str, 1, str.length())
@@ -60,7 +86,7 @@ bool isconstant(string& str) {
 
 
 // Converts a string constant to an integer
-int ctoi(string& str) {
+int sicxe_asm::ctoi(string& str) {
     return (str[0] == '$') ? hextoi(str.substr(1)): atoi(str.c_str());
 }
 
@@ -88,9 +114,9 @@ unsigned int size_for_literal(string& str) {
 }
 
 // Converts an integer to a string
-string itos(int integer) {
+string itos(int integer, int width) {
     stringstream itoss;
-    itoss << integer;
+    itoss << setw(width) << setfill('0') << integer;
     return itoss.str();
 }
 
@@ -137,7 +163,7 @@ void sicxe_asm::error_str(string msg) {
 
 void sicxe_asm::error_ln_str(string msg) {
     string str = "***Error***\n";
-    string lnmsg = "Line "+itos(index+1)+": "+label+" "+opcode+" "+operand+"\n";
+    string lnmsg = "Line "+itos(index+1, 0)+": "+label+" "+opcode+" "+operand+"\n";
     str.append(lnmsg);
     str.append(msg);
     throw str;
@@ -351,7 +377,10 @@ void sicxe_asm::handle_resw() {
 
 void sicxe_asm::handle_equ() {
     try {
-        symbols.add(label, operand);
+        struct symtab::symbol sym_pair;
+        sym_pair.isaddress = false;
+        sym_pair.value = operand;
+        symbols.add(label, sym_pair);
     }
     catch (symtab_exception e) {
         error_ln_str(e.getMessage());
@@ -377,7 +406,10 @@ void sicxe_asm::handle_empty() {
 void sicxe_asm::add_symbol_for_label() {
     if (!label.empty()) {
         try {
-            symbols.add(label, itos(locctr));
+            struct symtab::symbol sym_pair;
+            sym_pair.isaddress = true;
+            sym_pair.value = itos(locctr, 5);
+            symbols.add(label, sym_pair);
         }
         catch (symtab_exception e) {
             error_ln_str(e.getMessage());
@@ -385,12 +417,94 @@ void sicxe_asm::add_symbol_for_label() {
     }
 }
 
+string sicxe_asm::get_reg_val(string r){ // Return register number
+    int i = 0;
+    while(r[i])	{
+        r[i] = toupper(r[i]);
+        i++;
+    }
+    if ( r == "A" ) return "0";
+    else if ( r == "X" )  return "1";
+    else if ( r == "L" )  return "2";
+    else if ( r == "B" )  return "3";
+    else if ( r == "S" )  return "4";
+    else if ( r == "T" )  return "5";
+    else if ( r == "F" )  return "6";
+    else if ( r == "PC" ) return "8";
+    else if ( r == "SW" ) return "9";
+    else   return "";
+}
+
+int sicxe_asm::str_toint(string r){ // turns string into int
+    int tempint;
+    istringstream(r) >> tempint;
+    return tempint;
+}
+
+string sicxe_asm::int_tohex_tostr(int r){ //converts int into hex, then into string
+    stringstream tempstr;
+    tempstr << hex << r;
+    return tempstr.str();
+}
+
 void sicxe_asm::format1_objcode() {
     objCode = optab.get_machine_code(opcode);
 }
 
 void sicxe_asm::format2_objcode() {
-    // objCode =
+    string opc = opcode;
+    string oper = operand;
+    string op_machine_code = optab.get_machine_code(opc);
+    string machine_code, r1, r2 = "";
+    stringstream str(oper);
+    getline(str, r1, ',');
+    getline(str, r2);
+    string r1_value = get_reg_val(r1);
+    string r2_value = get_reg_val(r2);
+    
+    int i = 0;
+    while(opc[i])	{
+        opc[i] = tolower(opc[i]);
+        i++;
+    }
+    
+    if(r1 == ""){ // register 1 must exist or else error
+        error_str("Opcode " + opc + " has incorrect argument");
+    }
+    
+    if(opc == "clear" || opc == "tixr") {
+        if(r1_value == "")   { // register 1 must have a value
+            error_str("Opcode " + opc + " has incorrect argument");
+        }
+        machine_code = op_machine_code + r1_value + "0";
+    }
+    else if (opc == "shiftl" || opc == "shiftr") {
+        if(r2 == "" || r1_value == ""){
+            error_str("Opcode " + opc + " has incorrect argument");
+        }
+        else {
+            int tempint = str_toint(r2);
+            tempint--;
+            string tempR2 = int_tohex_tostr(tempint);
+            machine_code = op_machine_code + r1_value + tempR2;
+        }
+    }
+    else if ( opc == "svc") {
+        int tempint = str_toint(r1);
+        string tempR1 = int_tohex_tostr(tempint);
+        machine_code = op_machine_code + tempR1 + "0";
+    }
+    else	{
+        if(r2_value == "" || r1_value == "") { //register value nust exist
+            error_str("Opcode " + opc + " has incorrect argument");
+        }	
+        else
+            machine_code = op_machine_code + r1_value + r2_value;
+    }
+    if (machine_code == "")	{
+        error_str("Opcode " + opc + " does not exist"); 
+    }
+    objCode = machine_code;
 }
 
 void sicxe_asm::format3_objcode() {
@@ -398,11 +512,12 @@ void sicxe_asm::format3_objcode() {
         format4_objcode();
         return;
     }
-    // objCode =
+     objCode = "";
 }
 
 void sicxe_asm::format4_objcode() {
 	// objCode =
+    objCode = "";
 }
 
 void sicxe_asm::byte_objcode() {
@@ -416,7 +531,10 @@ void sicxe_asm::word_objcode() {
 void sicxe_asm::set_base_address() {
     objCode.clear();
     noBase = false;
-    // get symbol from symtab
+    // check valid address
+    struct sicxe_asm::symbol bsymbol = symtoval(operand);
+    base_addr = bsymbol.value;
+    cout << "base addr set to " << bsymbol.value << endl;
 }
 
 void sicxe_asm::set_nobase() {

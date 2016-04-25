@@ -18,15 +18,21 @@ using namespace std;
 
  class symtab {
  public:
-      	symtab();
-  	void add(string, string);
- 	string get(string);
+     
+     struct symbol {
+         bool isaddress;
+         string value;
+     };
+     
+    symtab();
+  	void add(string, struct symbol);
+ 	struct symbol get(string);
  	bool exists(string);
-     void print(); //remove before submission
+    void print(); //remove before submission
 
  private:
-      	map<string, string> symbol_table;
-	map<string, string>::iterator symbol_iter;
+    map<string, struct symbol> symbol_table;
+	map<string, struct symbol>::iterator symbol_iter;
  };
 
  #endif

@@ -18,6 +18,11 @@ using namespace std;
 class sicxe_asm {
     typedef void (sicxe_asm::*sym_handler)();
     
+    struct symbol {
+        bool isaddress;
+        int value;
+    };
+    
     struct hpair {
         sym_handler pass1;
         sym_handler pass2;
@@ -86,6 +91,17 @@ class sicxe_asm {
     void error_str(string msg);
     // Throws an error string also printing the line contents
     void error_ln_str(string msg);
+    
+    struct symbol symtoval(string& symbol);
+    bool islabel(string&);
+    int hextoi(string str);
+    bool isdecimal(string& str, size_t start, size_t end);
+    int ctoi(string& str);
+    bool isconstant(string& str);
+    
+    string get_reg_val(string);
+    int str_toint(string);
+    string int_tohex_tostr(int);
     
 public:
     // Sets up the handler map and listing file
