@@ -18,55 +18,103 @@ using namespace std;
 class sicxe_asm {
     typedef void (sicxe_asm::*sym_handler)();
     
-    string intermed_filen;
-    file_parser* parser;
-    opcodetab optab;
-    symtab symbols;
-    map<string, sym_handler> hmap;
-    vector<unsigned int> line_addrs;
-    unsigned int index;
-    unsigned int locctr;
-    string label;
-    string opcode;
-    string operand;
-    string comment;
-    ofstream listing;
-    int nixbpe[6];
+    struct symbol {
+        bool isaddress;
+        int value;
+    };
+    
+    struct hpair {
+        sym_handler pass1;
+        sym_handler pass2;
+    };
     
     struct dhpair {
         string directive;
-        sym_handler handler;
+        struct hpair handlers;
     };
     
     static const struct dhpair dhpairs[9];
     
-    void get_tokens();
-    void listing_head(string filename);
-    void listing_lnout();
+    file_parser* parser;
+    opcodetab optab;
+    symtab symbols;
+    map<string, struct sicxe_asm::hpair> hmap;
+    vector<unsigned int> line_addrs;
+    unsigned int index;
+    unsigned int locctr;
+    unsigned int base_addr;
+    bool noBase;
+    string label;
+    string opcode;
+    string operand;
+    string objCode;
+    stringstream listing;
     
+    // Retrives the line tokens from the file parser
+    void get_tokens();
+    // Setups the listing file with the program name and column headers
+    void listing_head(string filename);
+    // Writes a line to the listing file
+    void listing_lnout();
+    // Creates the map for looking up handlers for instructions and directives
     void setup_handler_map();
-    sym_handler handler_for_symbol();
+    // Retreives the symbol handler for the symbol
+    sym_handler handler_for_symbol(bool pass);
+    sym_handler pass1_handler();
+    sym_handler pass2_handler();
+    // Symbol handelers for instructions and directives
     void handle_instruction();
     void handle_start();
-    void handle_byte_word();
+    void handle_end();
+    void handle_byte();
+    void handle_word();
     void handle_resb();
     void handle_resw();
     void handle_equ();
-    void handle_directive();
+    void handle_base();
+    void handle_nobase();
     void handle_empty();
     
-    void add_symbol_for_label();
+    void format1_objcode();
+    void format2_objcode();
+    void format3_objcode();
+    void format4_objcode();
+    void byte_objcode();
+    void word_objcode();
+    void set_base_address();
+    void set_nobase();
+    void empty_objcode();
     
+    // Adds the label address to the symbol table if it has one
+    void add_symbol_for_label();
+    // Throws an error string
     void error_str(string msg);
+    // Throws an error string also printing the line contents
     void error_ln_str(string msg);
     
-    int getDisplacement( int, int );
+    struct symbol symtoval(string& symbol);
+    bool islabel(string&);
+    int hextoi(string str);
+    bool isdecimal(string& str, size_t start, size_t end);
+    int ctoi(string& str);
+    bool isconstant(string& str);
+    
+    string get_reg_val(string);
+    int str_toint(string);
+    string int_tohex_tostr(int);
     
 public:
+    // Sets up the handler map and listing file
     sicxe_asm(string file);
     ~sicxe_asm();
     
+    // Assigns addresses to each line, adds labels and directives to the symbol
+    // table
     void pass1();
+    void pass2();
+    
+    void write_listing(string file);
+    void print_listing(); // remove before submission
     
     void pass2();
     
