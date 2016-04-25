@@ -12,6 +12,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <ctype.h>
 #include "sicxe_asm.h"
 #include "file_parse_exception.h"
 #include "opcode_error_exception.h"
@@ -19,6 +20,8 @@
 
 using namespace std;
 
+
+// Converts a hex string to an integer value
 int hextoi(string str) {
     int integer;
     stringstream ss;
@@ -27,6 +30,8 @@ int hextoi(string str) {
     return integer;
 }
 
+
+// Checks that a string range contains only digits
 bool isdecimal(string& str, size_t start, size_t end) {
     for (size_t i = start; i < end; ++i) {
         if (!isdigit(str[i])) {
@@ -36,6 +41,8 @@ bool isdecimal(string& str, size_t start, size_t end) {
     return true;
 }
 
+
+// Checks that a string range contains only hexadecimal digits
 bool ishexadecimal(string& str, size_t start, size_t end) {
     string upper = str;
     transform(upper.begin(),upper.end(), upper.begin(), ::toupper);
@@ -47,6 +54,7 @@ bool ishexadecimal(string& str, size_t start, size_t end) {
     return true;
 }
 
+// Verifies that a string contains vaild hex or decimal digits
 bool isconstant(string& str) {
     if (str.empty())
         return false;
@@ -54,14 +62,18 @@ bool isconstant(string& str) {
     	: isdecimal(str, 0, str.length());
 }
 
+
+// Converts a string constant to an integer
 int ctoi(string& str) {
     return (str[0] == '$') ? hextoi(str.substr(1)) : hextoi(str);
 }
 
+// Verifies that a literal is quoted
 bool isquoted(string& str) {
     return ((str[1] == '\'') && (str[str.length()-1] == '\'')) ? true : false;
 }
 
+// Verifies that a string is a valid literal string
 bool isliteral(string& str) {
     if (str.empty() || str.length() < 3)
         return false;
@@ -73,22 +85,26 @@ bool isliteral(string& str) {
     return false;
 }
 
+// Returns the size for a quoted literal
 unsigned int size_for_literal(string& str) {
     return ((str[0] == 'c') || (str[0] == 'C')) ? (unsigned int)str.length()-3
     	: (unsigned int)(str.length()-3)>>1;
 }
 
+// Converts an integer to a string
 string itos(int integer) {
     stringstream itoss;
     itoss << integer;
     return itoss.str();
 }
 
+// Searches for the start directive
 bool is_start( string opcode ){
     transform(opcode.begin(), opcode.end(), opcode.begin(), ::toupper);
     return ( opcode.compare("START") == 0 ? true : false );
 }
 
+// Searches for the end directive
 bool is_end( string opcode ){
     transform(opcode.begin(), opcode.end(), opcode.begin(), ::toupper);
     return ( opcode.compare("END") == 0 ? true : false );
@@ -201,7 +217,6 @@ void sicxe_asm::get_tokens() {
     label = parser->get_token(index, 0);
     opcode = parser->get_token(index, 1);
     operand = parser->get_token(index, 2);
-    comment = parser->get_token(index, 3);
 }
 
 void sicxe_asm::listing_head(string filename) {
@@ -337,24 +352,118 @@ void sicxe_asm::add_symbol_for_label() {
         }
     }
 }
+//returns objCode for format 3
+void sicxe_asm::format3(){
+   string tempOperand = operand;
+   int addressCode;
+   nixbpe = 0;
+   try {
+      //Checks whether it has a symbol infront and changes the flags accordingly
+      if(tempOperand[0] == '@'){
+         nixbpe = 0x20;
+         tempOperand = tempOperand.subtr(1,tempOperand.size()-1);
+      }
+      else if(tempOperand[0] == '#'){
+         nixbpe = 0x10;
+         tempOperand = tempOperand.subtr(1,tempOperand.size()-1);
+      }
+      else{
+         nixbpe = 0x20;
+         nixbpe = 0x10;
+      }
+      //Checks if the operand has a X register then changes flags accordingly
+      //If there is something else after the ',' then it throws an error
+      if(tempOperand.find(',') != -1){
+         string registerX = tempOperand.substr(tempOperand.find(','),tempOperand.size()-1);
+         string rand1 = tempOperand.substr(0, tempOperand.find(','));
+         if(registerX == "X" || registerX == "x"){
+            nixbpe = 0x8;
+         }
+      }else if(!registerX.empty()){
+            throw;
+      }
+      struct sicxe_asm::symbol sym;
+      //gets address portion and checks if its a constant or an address.   
+      if(!sym.isaddress){
+         addressCode = sym.value;
+      }else{
+         addressCode = getDisplacement(sym.value,line_addrs.at(index) + 3);
+      }
+      
+      int intruction = 0;
+      instruction = hextoi(optab.get_machine_code(opcode)) << 18;
+      instruction |= nixpbe << 12;
+      instruction |= addressCode;
+      objCode = itos(instruction, 6);
+   }
+   catch (opcode_error_exception e) {
+      error_ln_str(e.getMessage());
+   }
+}
+
+void sicxe_asm::format4(){
+   string tempOpcode = substr(1,opcode.size()-1);
+   string tempOperand = operand;
+   int addressCode;
+   nixbpe = 0;
+   try {
+      nixbpe = 0x1;
+      if(tempOperand[0] == '@'){
+         if(!isalpha(tempOperand[1])){
+            throw;
+         }
+         nixbpe = 0x20;
+         tempOperand = tempOperand.subtr(1,tempOperand.size()-1);
+      }
+      else if(tempOperand[0] == '#'){
+         nixbpe = 0x10;
+         tempOperand = tempOperand.subtr(1,tempOperand.size()-1);
+      }
+      else{
+         nixbpe = 0x20;
+         nixbpe = 0x10;
+      }
+      if(tempOperand.find(',') != -1){
+         string registerX = tempOperand.substr(tempOperand.find(','),tempOperand.size()-1);
+         string rand1 = tempOperand.substr(0, tempOperand.find(','));
+         if(registerX == "X" || registerX == "x"){
+            nixbpe = 0x8;
+         }
+      }else if(!registerX.empty()){
+         throw;
+      }
+      
+      struct sicxe_asm::symbol sym;
+      
+      if(!sym.isaddress){
+         addressCode = sym.value;
+      }else{
+         addressCode = getDisplacement(sym.value, line_addrs.at(index) + 4);
+      }
+      int intruction = 0;
+      instruction = hextoi(optab.get_machine_code(TempOpcode)) << 26;
+      instruction |= nixpbe << 20;
+      instruction |= addressCode;
+      objCode = itos(instruction, 8);
+   }
+   catch (opcode_error_exception e) {
+      error_ln_str(e.getMessage());
+   }
+}
 
 int sicxe_asm::getDisplacement( int addr1, int addr2 ){
     int disp = addr1 - addr2;
+    int baseDisp = addr1 - base_addr;
     
     if ( disp >= -2048 && disp <= 2047 ){
-        nixbpe[3] = 0;
-        nixbpe[4] = 1;
+        nixbpe = 0x2;
         return disp;
+    } else if (!noBase && baseDisp >= 0 && baseDisp <= 4095){
+        nixbpe = 0x4;
+        return baseDisp;
+    }else {
+       error_ln_str("Addressing displacement out of bounds, use format 4");
     }
-    
-    if ( disp >= 0 && disp <= 4095 ){
-        nixbpe[3] = 1;
-        nixbpe[4] = 0;
-        return disp;
-    }
-    
-    error_ln_str("Addressing displacement out of bounds, use format 4");
-    
 }
 // Pass 2 Format 1 & 2
 string sicxe_asm::get_reg_val(string r){ // Return register number
