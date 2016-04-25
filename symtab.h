@@ -1,4 +1,4 @@
-/* Shad Aziz, Phillip Domann, Melanie Reed, Matt Walther
+/* Phillip Domann, Shad Aziz, Melanie Reed, Matt Walther
    masc0832
    Team Idaho
    prog3
@@ -19,13 +19,13 @@ using namespace std;
  class symtab {
  public:
       	symtab();
-  	void add(string, string);
- 	string get(string);
- 	bool exists(string);
+      	void add(string, string);
+        string get(string);
+        bool exists(string);
 
  private:
       	map<string, string> symbol_table;
-	map<string, string>::iterator symbol_iter;
+        map<string, string>::iterator symbol_iter;
  };
 
  #endif

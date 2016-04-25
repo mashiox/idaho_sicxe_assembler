@@ -1,4 +1,4 @@
-/* Shad Aziz, Phillip Domann, Melanie Reed, Matt Walther
+/* Phillip Domann, Shad Aziz, Melanie Reed, Matt Walther
    masc0832
    Team Idaho
    prog3
@@ -11,6 +11,7 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 #include "sicxe_asm.h"
 #include "file_parse_exception.h"
 #include "opcode_error_exception.h"
@@ -63,7 +64,7 @@ bool isconstant(string& str) {
 
 // Converts a string constant to an integer
 int ctoi(string& str) {
-    return (str[0] == '$') ? hextoi(str.substr(1)): atoi(str.c_str());
+    return (str[0] == '$') ? hextoi(str.substr(1)) : hextoi(str);
 }
 
 // Verifies that a literal is quoted
@@ -121,6 +122,7 @@ const struct sicxe_asm::dhpair sicxe_asm::dhpairs[9] = {
 };
 
 sicxe_asm::sicxe_asm(string file) {
+    intermed_filen = file;
     parser = new file_parser(file);
     locctr = 0;
     setup_handler_map();
@@ -194,6 +196,18 @@ void sicxe_asm::pass1() {
         listing_lnout();
         if (!opcode.empty()) {
             error_ln_str("Additional operations cannot exist after end directive.");
+        }
+    }
+}
+
+void sicxe_asm::pass2() {
+    parser = new file_parser(file);
+    
+    unsigned int nlines = (unsigned int)parser->size();
+    for ( index = 0 ; index < nlines ; index++ ){
+        get_tokens();
+        if ( is_start(opcode) ){
+            
         }
     }
 }
@@ -322,6 +336,7 @@ void sicxe_asm::handle_directive() {
     }
 }
 
+
 void sicxe_asm::handle_empty() {
     add_symbol_for_label();
 }
@@ -337,6 +352,25 @@ void sicxe_asm::add_symbol_for_label() {
     }
 }
 
+int sicxe_asm::getDisplacement( int addr1, int addr2 ){
+    int disp = addr1 - addr2;
+    
+    if ( disp >= -2048 && disp <= 2047 ){
+        nixbpe[3] = 0;
+        nixbpe[4] = 1;
+        return disp;
+    }
+    
+    if ( disp >= 0 && disp <= 4095 ){
+        nixbpe[3] = 1;
+        nixbpe[4] = 0;
+        return disp;
+    }
+    
+    error_ln_str("Addressing displacement out of bounds, use format 4");
+    
+}
+
 int main(int argc, char* argv[]) {
     if (argc != 2) {
         cout << "Proper usage is " << argv[0] << " filename. " << endl;
@@ -347,7 +381,6 @@ int main(int argc, char* argv[]) {
     
     try {
     	assembler.pass1();
-        return 0;
     }
     catch (file_parse_exception fpe) {
         cout << fpe.getMessage();
@@ -360,6 +393,11 @@ int main(int argc, char* argv[]) {
     }
     catch (string str) {
         cout << str;
+    }
+    
+    try {
+        assembler.pass2();
+        return 0;
     }
     
     return 1;

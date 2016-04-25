@@ -9,6 +9,7 @@
 #define OPCODETAB_H
 
 #include <map>
+#include "opcode_error_exception.h"
 
 using namespace std;
 

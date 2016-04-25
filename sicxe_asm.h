@@ -18,6 +18,7 @@ using namespace std;
 class sicxe_asm {
     typedef void (sicxe_asm::*sym_handler)();
     
+    string intermed_filen;
     file_parser* parser;
     opcodetab optab;
     symtab symbols;
@@ -29,6 +30,7 @@ class sicxe_asm {
     string opcode;
     string operand;
     ofstream listing;
+    int nixbpe[6];
     
     struct dhpair {
         string directive;
@@ -63,6 +65,8 @@ class sicxe_asm {
     // Throws an error string also printing the line contents
     void error_ln_str(string msg);
     
+    int getDisplacement( int, int );
+    
 public:
     // Sets up the handler map and listing file
     sicxe_asm(string file);
@@ -71,6 +75,8 @@ public:
     // Assigns addresses to each line, adds labels and directives to the symbol
     // table
     void pass1();
+    
+    void pass2();
     
 };
 
