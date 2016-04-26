@@ -633,8 +633,19 @@ void sicxe_asm::format4_objcode() {
 }
 
 void sicxe_asm::byte_objcode() {
-   objCode = "";
-    // objCode =
+    objCode = "";
+    string literal = operand;
+    literal.erase(literal.length()-1);
+    literal.erase(0, 2);
+    if (operand[0] == 'x' || operand[0] == 'X') {
+        for (string::iterator it = literal.begin(); it != literal.end(); ++it) {
+            objCode += toupper(*it);
+        }
+    } else {
+        for (string::iterator it = literal.begin(); it != literal.end(); ++it) {
+            objCode += itohexs(*it, 2);
+        }
+    }
 }
 
 void sicxe_asm::word_objcode() {
