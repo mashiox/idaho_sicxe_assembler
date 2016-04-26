@@ -44,6 +44,7 @@ class sicxe_asm {
     unsigned int locctr;
     unsigned int base_addr;
     bool noBase;
+    int nixbpe;
     string label;
     string opcode;
     string operand;
@@ -98,7 +99,7 @@ class sicxe_asm {
     bool isdecimal(string& str, size_t start, size_t end);
     int ctoi(string& str);
     bool isconstant(string& str);
-    
+    int getDisplacement( int addr1, int addr2 );
     string get_reg_val(string);
     int str_toint(string);
     string int_tohex_tostr(int);
