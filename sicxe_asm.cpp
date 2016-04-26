@@ -121,6 +121,12 @@ string itos(int integer, int width) {
     return itoss.str();
 }
 
+string itohexs(int integer, int width) {
+    stringstream itoss;
+    itoss << hex << uppercase << setw(width) << setfill('0') << integer;
+    return itoss.str();
+}
+
 // Searches for the start directive
 bool is_start( string opcode ){
     transform(opcode.begin(), opcode.end(), opcode.begin(), ::toupper);
@@ -333,13 +339,13 @@ sicxe_asm::sym_handler sicxe_asm::handler_for_symbol(bool pass) {
 }
 
 void sicxe_asm::handle_instruction() {
+    add_symbol_for_label();
     try {
         locctr += optab.get_instruction_size(opcode);
     }
     catch (opcode_error_exception e) {
         error_ln_str(e.getMessage());
     }
-    add_symbol_for_label();
 }
 
 void sicxe_asm::handle_start() {
@@ -358,35 +364,35 @@ void sicxe_asm::handle_end() {
 }
 
 void sicxe_asm::handle_byte() {
+    add_symbol_for_label();
     if (isliteral(operand))
         locctr += size_for_literal(operand);
     else
         error_ln_str("Invalid quoted literal.");
-    add_symbol_for_label();
 }
 
 void sicxe_asm::handle_word() {
+    add_symbol_for_label();
     if(isconstant(operand))
         locctr += 3;
     else
         error_ln_str("Invalid constant");
-    add_symbol_for_label();
 }
 
 void sicxe_asm::handle_resb() {
+    add_symbol_for_label();
     if (isconstant(operand))
         locctr += ctoi(operand);
     else
         error_ln_str("Invalid constant.");
-    add_symbol_for_label();
 }
 
 void sicxe_asm::handle_resw() {
+    add_symbol_for_label();
     if (isconstant(operand))
         locctr += ctoi(operand)*3;
     else
         error_ln_str("Invalid constant.");
-    add_symbol_for_label();
 }
 
 void sicxe_asm::handle_equ() {
@@ -564,8 +570,23 @@ int sicxe_asm::str_toint(string r){ // turns string into int
 
 string sicxe_asm::int_tohex_tostr(int r){ //converts int into hex, then into string
     stringstream tempstr;
-    tempstr << hex << r;
+    tempstr << hex << uppercase << r;
     return tempstr.str();
+}
+
+int sicxe_asm::getDisplacement( int addr1, int addr2 ){
+    int disp = addr1 - addr2;
+    int baseDisp = addr1 - base_addr;
+    
+    if ( disp >= -2048 && disp <= 2047 ){
+        nixbpe |= 0x2;
+        return disp;
+    } else if (!noBase && (baseDisp >= 0 && baseDisp <= 4095)){
+        nixbpe |= 0x4;
+        return baseDisp;
+    }
+    error_ln_str("Addressing displacement out of bounds, use format 4");
+    return 0;
 }
 
 void sicxe_asm::format1_objcode() {
@@ -633,20 +654,124 @@ void sicxe_asm::format3_objcode() {
         format4_objcode();
         return;
     }
-     objCode = "";
+    string tempOperand = operand;
+    int addressCode;
+    bool isX;
+    nixbpe = 0;
+    try {
+        //Checks whether it has a symbol infront and changes the flags accordingly
+        if(tempOperand[0] == '@'){
+            nixbpe |= 0x20;
+            isX = false;
+            tempOperand = tempOperand.substr(1,tempOperand.size()-1);
+        }
+        else if(tempOperand[0] == '#'){
+            nixbpe |= 0x10;
+            isX = false;
+            tempOperand = tempOperand.substr(1,tempOperand.size()-1);
+        }
+        else{
+            nixbpe |= 0x20;
+            nixbpe |= 0x10;
+            isX = true;
+        }
+        //Checks if the operand has a X register then changes flags accordingly
+        //If there is something else after the ',' then it throws an error
+        if(tempOperand.find(',') != -1){
+            string registerX = tempOperand.substr(tempOperand.find(',')+1,tempOperand.size()-1);
+            if((registerX == "X" || registerX == "x") && isX){
+                nixbpe |= 0x8;
+            }else if(!registerX.empty()){
+                error_ln_str("Only X register may be used for index addressing.");
+            }
+        }
+        string rand1 = tempOperand.substr(0, tempOperand.find(','));
+        struct sicxe_asm::symbol sym = symtoval(rand1);
+        //gets address portion and checks if its a constant or an address.
+        if(!sym.isaddress){
+            addressCode = sym.value;
+        }else{
+            addressCode = getDisplacement(sym.value,line_addrs.at(index) + 3);
+        }
+        
+        int instruction = 0;
+        instruction = hextoi(optab.get_machine_code(opcode)) << 16;
+        instruction |= nixbpe << 12;
+        instruction |= addressCode & 0xFFF;
+        objCode = itohexs(instruction, 6);
+    }
+    catch (opcode_error_exception e) {
+        error_ln_str(e.getMessage());
+    }
 }
 
 void sicxe_asm::format4_objcode() {
-	// objCode =
-    objCode = "";
+    string tempOpcode = opcode.substr(1,opcode.size()-1);
+    string tempOperand = operand;
+    int addressCode;
+    bool isX;
+    nixbpe = 0;
+    try {
+        nixbpe |= 0x1;
+        if(tempOperand[0] == '@'){
+            if(!isalpha(tempOperand[1])){
+                throw;
+            }
+            nixbpe |= 0x20;
+            isX = false;
+            tempOperand = tempOperand.substr(1,tempOperand.size()-1);
+        }
+        else if(tempOperand[0] == '#'){
+            nixbpe |= 0x10;
+            isX = false;
+            tempOperand = tempOperand.substr(1,tempOperand.size()-1);
+        }
+        else{
+            nixbpe |= 0x30;
+            isX = true;
+        }
+        if(tempOperand.find(',') != -1){
+            string registerX = tempOperand.substr(tempOperand.find(',')+1,tempOperand.size()-1);
+            if((registerX == "X" || registerX == "x") && isX){
+                nixbpe |= 0x8;
+            } else if(!registerX.empty()){
+                throw;
+            }
+        }
+        
+        string rand1 = tempOperand.substr(0, tempOperand.find(','));
+        struct sicxe_asm::symbol sym = symtoval(rand1);
+		addressCode = sym.value & 0xFFFFF;
+        int instruction = 0;
+        instruction = hextoi(optab.get_machine_code(tempOpcode)) << 24;
+        instruction |= nixbpe << 20;
+        instruction |= addressCode;
+        objCode = itohexs(instruction, 8);
+    }
+    catch (opcode_error_exception e) {
+        error_ln_str(e.getMessage());
+    }
 }
 
 void sicxe_asm::byte_objcode() {
-    // objCode =
+    objCode = "";
+    string literal = operand;
+    literal.erase(literal.length()-1);
+    literal.erase(0, 2);
+    if (operand[0] == 'x' || operand[0] == 'X') {
+        for (string::iterator it = literal.begin(); it != literal.end(); ++it) {
+            objCode += toupper(*it);
+        }
+    } else {
+        for (string::iterator it = literal.begin(); it != literal.end(); ++it) {
+            objCode += itohexs(*it, 2);
+        }
+    }
 }
 
 void sicxe_asm::word_objcode() {
-    // objCode =
+    int word = ctoi(operand);
+    objCode = itohexs(word, 6);
 }
 
 void sicxe_asm::set_base_address() {
